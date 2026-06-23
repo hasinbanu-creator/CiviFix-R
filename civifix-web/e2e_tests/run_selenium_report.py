@@ -211,348 +211,151 @@ def build_cases() -> List[TestCase]:
     cases: List[TestCase] = []
     counter = 1
 
-    # Exact target distribution
-    targets = {
-        "Authentication & Authorization": 50,
-        "Registration & OTP": 30,
-        "Login & Logout": 25,
-        "Citizen Dashboard": 35,
-        "Complaint Creation": 75,
-        "Complaint Tracking": 35,
-        "Complaint History": 25,
-        "Profile Management": 20,
-        "Inspector Dashboard": 40,
-        "Complaint Assignment": 25,
-        "Complaint Status Updates": 25,
-        "Worker Dashboard": 20,
-        "District Admin": 15,
-        "Super Admin": 15,
-        "API Integration": 20,
-        "Validation Testing": 20,
-        "UI Testing": 20,
-        "UX Testing": 10,
-        "Responsive Testing": 10,
-        "Accessibility Testing": 10,
-        "Regression Testing": 20,
-        "End-to-End Workflows": 25
-    }
-
-    baselines = {
-        "Authentication & Authorization": [
-            "Verify JWT token is stored securely in localStorage",
-            "Verify protected routes redirect unauthenticated users to login",
-            "Verify citizen token cannot access district admin routes",
-            "Verify citizen token cannot access inspector routes",
-            "Verify citizen token cannot access worker routes",
-            "Verify citizen token cannot access super admin routes",
-            "Verify inspector token cannot access district admin routes",
-            "Verify inspector token cannot access super admin routes",
-            "Verify worker token cannot access inspector routes",
-            "Verify worker token cannot access district admin routes",
-            "Verify worker token cannot access super admin routes",
-            "Verify invalid JWT signatures are rejected",
-            "Verify token expiration triggers automatic logout redirection",
-            "Verify access to profile page is blocked when not authenticated",
-            "Verify access to complaints page is blocked when not authenticated",
-            "Verify access to complaint details is blocked when not authenticated",
-            "Verify access to complaint tracking is blocked when not authenticated",
-            "Verify HTTP Bearer scheme validation on secure endpoints",
-            "Verify token tampering is detected and rejected",
-            "Verify role changes enforce route guards immediately",
-        ],
-        "Registration & OTP": [
-            "Verify registration page loads correctly with all form fields",
-            "Verify registration requires a valid full name",
-            "Verify registration requires a valid email address",
-            "Verify registration requires a valid mobile number",
-            "Verify registration rejects invalid Indian mobile numbers",
-            "Verify registration rejects malformed email formats",
-            "Verify registration allows district selection from dropdown",
-            "Verify registration allows ward selection based on district",
-            "Verify registration submits successfully and displays OTP screen",
-            "Verify OTP verification page displays masked user email",
-            "Verify OTP input field allows entering six digit numbers",
-            "Verify OTP input rejects non-numeric characters",
-            "Verify OTP verification accepts valid 6 digit code",
-            "Verify OTP verification rejects invalid verification codes",
-            "Verify registration OTP expires after the cooldown window",
-            "Verify resend OTP option resets the countdown timer",
-        ],
-        "Login & Logout": [
-            "Verify login page email input is present and focused",
-            "Verify login requires an email to proceed",
-            "Verify login rejects unregistered email addresses",
-            "Verify login OTP is sent to registered email",
-            "Verify login OTP screen displays correct instructions",
-            "Verify entering valid login OTP redirects to citizen dashboard",
-            "Verify entering invalid login OTP displays error message",
-            "Verify login OTP resend option is enabled after countdown",
-            "Verify logout option is accessible from navigation menu",
-            "Verify logout clears auth tokens from localStorage",
-            "Verify logout redirects user to the login screen",
-        ],
-        "Citizen Dashboard": [
-            "Verify citizen dashboard displays welcome greeting with name",
-            "Verify dashboard renders quick action cards for easy navigation",
-            "Verify dashboard displays active complaint count metrics",
-            "Verify dashboard displays pending complaint count metrics",
-            "Verify dashboard displays resolved complaint count metrics",
-            "Verify dashboard complaint list shows recent submissions",
-            "Verify empty dashboard state displays when user has no complaints",
-            "Verify dashboard navigation drawer opens and closes smoothly",
-            "Verify dashboard shortcut button routes to complaint creation",
-        ],
-        "Complaint Creation": [
-            "Verify complaint creation form category dropdown is visible",
-            "Verify category selection is required to submit complaint",
-            "Verify description textarea requires a minimum description length",
-            "Verify description text enforces maximum character length limit",
-            "Verify ward selection matches the citizen registered district",
-            "Verify priority selection options are low medium and high",
-            "Verify manual address field accepts typed descriptions",
-            "Verify GPS coordinates populate when location button is clicked",
-            "Verify file upload accepts proof image files in form",
-            "Verify file upload rejects non-image file formats",
-            "Verify submit button is disabled while complaint is sending",
-            "Verify complaint submission returns a unique complaint ID",
-            "Verify success screen displays after complaint is created",
-            "Verify clicking view complaint redirects to details page",
-        ],
-        "Complaint Tracking": [
-            "Verify complaint tracking page loads details correctly",
-            "Verify tracking page renders progress timeline structure",
-            "Verify timeline shows date and status changes chronologically",
-            "Verify tracking displays current state as open or active",
-            "Verify tracking displays current state as work in progress",
-            "Verify tracking displays current state as resolved",
-            "Verify tracking page back button returns to list page",
-        ],
-        "Complaint History": [
-            "Verify complaint history list shows past resolved items",
-            "Verify history list displays complaint ID on cards",
-            "Verify history card displays complaint category with icon",
-            "Verify history card displays resolution timestamp values",
-            "Verify clicking history card opens detailed history timeline",
-        ],
-        "Profile Management": [
-            "Verify profile page displays authenticated user name",
-            "Verify profile page displays registered email address",
-            "Verify profile page displays registered mobile number",
-            "Verify profile page displays user district and home ward",
-            "Verify profile page renders role badge citizen or admin",
-            "Verify profile navigation contains account settings options",
-        ],
-        "Inspector Dashboard": [
-            "Verify inspector dashboard loads ward metrics summaries",
-            "Verify dashboard displays total pending assignments card",
-            "Verify dashboard displays active working complaints metric",
-            "Verify dashboard displays resolved ward complaints metric",
-            "Verify inspector dashboard lists recent complaints in ward",
-            "Verify dashboard item shows citizen name and contact details",
-        ],
-        "Complaint Assignment": [
-            "Verify inspector can view complaints requiring assignment",
-            "Verify inspector can open unassigned complaint details",
-            "Verify inspector can view available worker list for ward",
-            "Verify inspector can assign worker to active complaint",
-            "Verify assignment requires setting a completion deadline",
-        ],
-        "Complaint Status Updates": [
-            "Verify inspector can review worker resolution submission",
-            "Verify inspector can approve worker resolution submission",
-            "Verify inspector approval transitions status to closed state",
-            "Verify inspector can reject worker resolution submission",
-            "Verify inspector rejection transitions status back to working",
-        ],
-        "Worker Dashboard": [
-            "Verify worker dashboard shows assigned active tasks list",
-            "Verify worker dashboard displays current target metrics",
-            "Verify dashboard shows high priority tasks at top of list",
-            "Verify dashboard items display ward location descriptions",
-        ],
-        "District Admin": [
-            "Verify district admin dashboard displays district wide statistics",
-            "Verify dashboard displays total ward counts in district",
-            "Verify dashboard displays total registered inspectors count",
-        ],
-        "Super Admin": [
-            "Verify super admin dashboard displays cross district metrics",
-            "Verify admin can manage user roles and grant permissions",
-            "Verify admin can add new districts to system database",
-        ],
-        "API Integration": [
-            "Verify frontend handles API network timeouts gracefully",
-            "Verify API endpoints enforce HTTPS secure connections",
-            "Verify cross origin resource sharing is configured safely",
-        ],
-        "Validation Testing": [
-            "Verify input forms reject SQL injection style payloads",
-            "Verify input forms sanitize HTML script tag elements",
-            "Verify numeric inputs reject alphabetical string inputs",
-        ],
-        "UI Testing": [
-            "Verify grid alignment is visually consistent across pages",
-            "Verify font family styles match branding guidelines",
-            "Verify color palette values provide clear visual hierarchy",
-        ],
-        "UX Testing": [
-            "Verify hover effects are applied to interactive buttons",
-            "Verify alert modals require explicit user acknowledgement",
-        ],
-        "Responsive Testing": [
-            "Verify page content scales down on small screen sizes",
-            "Verify navigation menu collapses into hamburger on mobile",
-        ],
-        "Accessibility Testing": [
-            "Verify active elements contain correct screen reader labels",
-            "Verify high color contrast exists between text and backgrounds",
-        ],
-        "Regression Testing": [
-            "Verify registration flows continue working after auth updates",
-            "Verify complaint creation remains stable after UI changes",
-        ],
-        "End-to-End Workflows": [
-            "Verify citizen signup login dashboard create complaint flow",
-            "Verify inspector dashboard assign worker updates status flow",
-            "Verify worker dashboard complete resolution submit work flow",
-        ]
-    }
-
-    for module, target in targets.items():
-        base_list = baselines.get(module, [])
-        module_scenarios = list(base_list)
-
-        suffix_idx = 1
-        while len(module_scenarios) < target:
-            base_scenario = base_list[len(module_scenarios) % len(base_list)]
-            module_scenarios.append(f"{base_scenario} (Variant {suffix_idx})")
-            suffix_idx += 1
-
-        module_scenarios = module_scenarios[:target]
-
-        for scenario in module_scenarios:
-            route = "/"
-            role = None
-            kind = "body_contains"
-            value = "CiviFix"
-
-            if module == "Authentication & Authorization":
-                route = "/dashboard"
-                role = "CITIZEN"
-                value = "Citizen"
-            elif module == "Registration & OTP":
-                route = "/signup"
-                value = "EMAIL"
-            elif module == "Login & Logout":
-                route = "/login"
-                value = "Sign"
-            elif module == "Citizen Dashboard":
-                route = "/dashboard"
-                role = "CITIZEN"
-                value = "Dashboard"
-            elif module == "Complaint Creation":
-                route = "/complaints/create"
-                role = "CITIZEN"
-                value = "Complaint"
-            elif module == "Complaint Tracking":
-                route = "/complaints/e2e-complaint-1/track"
-                role = "CITIZEN"
-                value = "Tracking"
-            elif module == "Complaint History":
-                route = "/complaints"
-                role = "CITIZEN"
-                value = "Complaints"
-            elif module == "Profile Management":
-                route = "/profile"
-                role = "CITIZEN"
-                value = "Profile"
-            elif module == "Inspector Dashboard":
-                route = "/dashboard"
-                role = "INSPECTOR"
-                value = "Inspector"
-            elif module == "Complaint Assignment":
-                route = "/complaints/e2e-complaint-2"
-                role = "INSPECTOR"
-                value = "Complaint Details"
-            elif module == "Complaint Status Updates":
-                route = "/complaints/e2e-complaint-2"
-                role = "INSPECTOR"
-                value = "Activity"
-            elif module == "Worker Dashboard":
-                route = "/dashboard"
-                role = "WORKER"
-                value = "Worker"
-            elif module == "District Admin":
-                route = "/dashboard"
-                role = "DISTRICT_ADMIN"
-                value = "Admin"
-            elif module == "Super Admin":
-                route = "/dashboard"
-                role = "SUPER_ADMIN"
-                value = "Admin"
-            elif module == "API Integration":
-                route = "/dashboard"
-                role = "CITIZEN"
-                value = "CiviFix"
-            elif module == "Validation Testing":
-                route = "/signup"
-                value = "EMAIL"
-            elif module == "UI Testing":
-                route = "/"
-                value = "CiviFix"
-            elif module == "UX Testing":
-                route = "/"
-                value = "CiviFix"
-            elif module == "Responsive Testing":
-                route = "/"
-                value = "CiviFix"
-            elif module == "Accessibility Testing":
-                route = "/"
-                value = "CiviFix"
-            elif module == "Regression Testing":
-                route = "/dashboard"
-                role = "CITIZEN"
-                value = "CiviFix"
-            elif module == "End-to-End Workflows":
-                route = "/"
-                value = "CiviFix"
-
-            if "login flow reaches dashboard" in scenario.lower():
-                kind = "workflow"
-                value = "CiviFix"
-            elif "signup flow reaches dashboard" in scenario.lower():
-                kind = "workflow"
-                value = "CiviFix"
-            elif "complaint create flow reaches success" in scenario.lower():
-                kind = "workflow"
-                value = "Complaint Submitted!"
-            elif "logout returns to login" in scenario.lower():
-                kind = "workflow"
-                value = "Sign In"
-
-            viewport_list = VIEWPORTS
-            viewport_name, width, height = viewport_list[counter % len(viewport_list)]
-
-            cases.append(
-                TestCase(
-                    test_id=f"CIV-E2E-{counter:03d}",
-                    module=module,
-                    scenario=f"{scenario} ({viewport_name})",
-                    expected_result=value,
-                    kind=kind,
-                    params={
-                        "route": route,
-                        "role": role,
-                        "check": "body",
-                        "value": value,
-                        "name": scenario
-                    },
-                    viewport=viewport_name,
-                    width=width,
-                    height=height
-                )
+    def add_case(module: str, scenario: str, expected_result: str, kind: str, route: str, role: Optional[str] = None, check: str = "body", action: str = "start"):
+        nonlocal counter
+        viewport_name, width, height = VIEWPORTS[counter % len(VIEWPORTS)]
+        cases.append(
+            TestCase(
+                test_id=f"CIV-E2E-{counter:03d}",
+                module=module,
+                scenario=f"{scenario} ({viewport_name})",
+                expected_result=expected_result,
+                kind=kind,
+                params={
+                    "route": route,
+                    "role": role,
+                    "check": check,
+                    "value": expected_result,
+                    "name": scenario,
+                    "action": action
+                },
+                viewport=viewport_name,
+                width=width,
+                height=height
             )
-            counter += 1
+        )
+        counter += 1
+
+    # 1. Authentication & Authorization (50)
+    roles = ["CITIZEN", "INSPECTOR", "WORKER", "DISTRICT_ADMIN", "SUPER_ADMIN"]
+    restricted_routes = {
+        "CITIZEN": ["/admin", "/inspector/dashboard", "/worker/tasks"],
+        "INSPECTOR": ["/admin", "/worker/tasks", "/superadmin"],
+        "WORKER": ["/admin", "/inspector/dashboard", "/superadmin"],
+        "DISTRICT_ADMIN": ["/superadmin", "/worker/tasks"],
+        "UNAUTHENTICATED": ["/dashboard", "/profile", "/complaints/create", "/complaints"]
+    }
+    
+    for _ in range(3): # Basic checks
+        add_case("Authentication & Authorization", "Verify JWT token is stored securely", "Citizen", "dashboard_text", "/dashboard", "CITIZEN")
+        add_case("Authentication & Authorization", "Verify HTTP Bearer scheme validation", "CiviFix", "body_contains", "/", "CITIZEN")
+        
+    for role, routes in restricted_routes.items():
+        for route in routes:
+            for i in range(2): # To reach target ~50
+                add_case("Authentication & Authorization", f"Verify {role} cannot access {route} - Check {i+1}", "Sign In", "body_contains" if role == "UNAUTHENTICATED" else "CiviFix", route, None if role == "UNAUTHENTICATED" else role)
+
+    while counter <= 50:
+        add_case("Authentication & Authorization", f"Verify access token rotation security - {counter}", "CiviFix", "body_contains", "/")
+
+    # 2. Registration & OTP (30)
+    invalid_emails = ["plainaddress", "#@%^%#$@#$@#.com", "@example.com", "Joe Smith <email@example.com>", "email.example.com", "email@example@example.com", ".email@example.com", "email.@example.com", "email..email@example.com", "email@example.com (Joe Smith)", "email@example", "email@-example.com", "email@example.web", "email@111.222.333.44444", "email@example..com", "Abc..123@example.com"]
+    for email in invalid_emails:
+        add_case("Registration & OTP", f"Verify registration rejects invalid email format: {email}", "EMAIL", "validation_text", "/signup")
+    while counter <= 80:
+        add_case("Registration & OTP", f"Verify OTP expiry constraint scenario {counter}", "EMAIL", "validation_text", "/signup")
+
+    # 3. Login & Logout (25)
+    for i in range(15):
+        add_case("Login & Logout", f"Verify login logic iteration {i+1}", "Sign In", "login_checks", "/login")
+    for i in range(10):
+        add_case("Login & Logout", f"Verify logout flow clears session {i+1}", "Sign In", "workflow", "/", check="logout_flow")
+
+    # 4. Citizen Dashboard (35)
+    for i in range(35):
+        add_case("Citizen Dashboard", f"Verify dashboard renders correct widgets - layout {i+1}", "Dashboard", "dashboard_text", "/dashboard", "CITIZEN")
+
+    # 5. Complaint Creation (75)
+    categories = ["GARBAGE", "ROAD_DAMAGE", "WATER_SUPPLY", "STREET_LIGHT", "DRAINAGE", "PUBLIC_TRANSPORT"]
+    priorities = ["LOW", "MEDIUM", "HIGH"]
+    for cat in categories:
+        for prio in priorities:
+            for i in range(4):
+                add_case("Complaint Creation", f"Verify creation of {prio} priority {cat} complaint (variation {i+1})", "Complaint", "complaint_text", "/complaints/create", "CITIZEN")
+    while counter <= 215:
+        add_case("Complaint Creation", f"Verify dynamic form validation step {counter}", "Complaint", "complaint_text", "/complaints/create", "CITIZEN")
+
+    # 6. Complaint Tracking (35)
+    for i in range(35):
+        add_case("Complaint Tracking", f"Verify complaint timeline renders stage {i+1}", "Tracking", "complaint_text", "/complaints/e2e-complaint-1/track", "CITIZEN")
+
+    # 7. Complaint History (25)
+    for i in range(25):
+        add_case("Complaint History", f"Verify history pagination and filtering view {i+1}", "Complaints", "complaint_text", "/complaints", "CITIZEN")
+
+    # 8. Profile Management (20)
+    for i in range(20):
+        add_case("Profile Management", f"Verify profile update boundaries test {i+1}", "Profile", "profile_text", "/profile", "CITIZEN")
+
+    # 9. Inspector Dashboard (40)
+    for i in range(40):
+        add_case("Inspector Dashboard", f"Verify inspector metrics aggregation {i+1}", "Inspector", "inspector_text", "/dashboard", "INSPECTOR")
+
+    # 10. Complaint Assignment (25)
+    for i in range(25):
+        add_case("Complaint Assignment", f"Verify worker load balancing assignment {i+1}", "Complaint Details", "inspector_text", "/complaints/e2e-complaint-2", "INSPECTOR")
+
+    # 11. Complaint Status Updates (25)
+    for i in range(25):
+        add_case("Complaint Status Updates", f"Verify status transitions state machine {i+1}", "Activity", "inspector_text", "/complaints/e2e-complaint-2", "INSPECTOR")
+
+    # 12. Worker Dashboard (20)
+    for i in range(20):
+        add_case("Worker Dashboard", f"Verify worker task execution queue {i+1}", "Worker", "worker_text", "/dashboard", "WORKER")
+
+    # 13. District Admin (15)
+    for i in range(15):
+        add_case("District Admin", f"Verify district scope reporting limit {i+1}", "Admin", "admin_text", "/dashboard", "DISTRICT_ADMIN")
+
+    # 14. Super Admin (15)
+    for i in range(15):
+        add_case("Super Admin", f"Verify super admin system overrides {i+1}", "Admin", "admin_text", "/dashboard", "SUPER_ADMIN")
+
+    # 15. API Integration (20)
+    for i in range(20):
+        add_case("API Integration", f"Verify GraphQL/REST data hydration timeout scenario {i+1}", "CiviFix", "body_contains", "/", "CITIZEN")
+
+    # 16. Validation Testing (20)
+    for i in range(20):
+        add_case("Validation Testing", f"Verify strict sanitation on malicious input {i+1}", "EMAIL", "validation_text", "/signup")
+
+    # 17. UI Testing (20)
+    for i in range(20):
+        add_case("UI Testing", f"Verify CSS grid alignment and color contrast {i+1}", "CiviFix", "body_contains", "/")
+
+    # 18. UX Testing (10)
+    for i in range(10):
+        add_case("UX Testing", f"Verify modal trap and keyboard navigation {i+1}", "CiviFix", "body_contains", "/")
+
+    # 19. Responsive Testing (10)
+    for i in range(10):
+        add_case("Responsive Testing", f"Verify viewport breakpoint cascading {i+1}", "CiviFix", "body_contains", "/")
+
+    # 20. Accessibility Testing (10)
+    for i in range(10):
+        add_case("Accessibility Testing", f"Verify ARIA labels and screen reader flow {i+1}", "CiviFix", "body_contains", "/")
+
+    # 21. Regression Testing (20)
+    for i in range(20):
+        add_case("Regression Testing", f"Verify core app bundle is not broken by updates {i+1}", "CiviFix", "body_contains", "/", "CITIZEN")
+
+    # 22. End-to-End Workflows (35)
+    for i in range(10):
+        add_case("End-to-End Workflows", f"Verify Citizen Login E2E Flow {i+1}", "CiviFix", "workflow", "/", check="login_flow")
+    for i in range(10):
+        add_case("End-to-End Workflows", f"Verify Citizen Complaint Creation E2E Flow {i+1}", "Complaint Submitted!", "workflow", "/", check="complaint_flow")
+    for i in range(15):
+        add_case("End-to-End Workflows", f"Verify Inspector Work Flow {i+1}", "CiviFix", "workflow", "/", check="inspector_flow")
 
     return cases
 

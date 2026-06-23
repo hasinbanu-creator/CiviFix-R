@@ -49,37 +49,63 @@ class BasePage:
             logger.error(f"Elements not found: {locator} - {str(e)}")
             return []
     
-    def click_element(self, locator):
-        """Click element"""
-        try:
-            element = self.wait.until(EC.element_to_be_clickable(locator))
-            element.click()
-            logger.info(f"Clicked element: {locator}")
-        except Exception as e:
-            logger.error(f"Click failed: {locator} - {str(e)}")
-            raise
+    def click_element(self, locator, retries=3):
+        """Click element with retry logic"""
+        from selenium.common.exceptions import StaleElementReferenceException
+        import time
+        for attempt in range(retries):
+            try:
+                element = self.wait.until(EC.element_to_be_clickable(locator))
+                element.click()
+                logger.info(f"Clicked element: {locator}")
+                return
+            except StaleElementReferenceException:
+                if attempt == retries - 1:
+                    logger.error(f"Click failed due to stale element: {locator}")
+                    raise
+                time.sleep(0.5)
+            except Exception as e:
+                logger.error(f"Click failed: {locator} - {str(e)}")
+                raise
     
-    def type_text(self, locator, text):
-        """Type text into element"""
-        try:
-            element = self.find_element(locator)
-            element.clear()
-            element.send_keys(text)
-            logger.info(f"Typed text in: {locator}")
-        except Exception as e:
-            logger.error(f"Type text failed: {locator} - {str(e)}")
-            raise
+    def type_text(self, locator, text, retries=3):
+        """Type text into element with retry logic"""
+        from selenium.common.exceptions import StaleElementReferenceException
+        import time
+        for attempt in range(retries):
+            try:
+                element = self.find_element(locator)
+                element.clear()
+                element.send_keys(text)
+                logger.info(f"Typed text in: {locator}")
+                return
+            except StaleElementReferenceException:
+                if attempt == retries - 1:
+                    logger.error(f"Type text failed due to stale element: {locator}")
+                    raise
+                time.sleep(0.5)
+            except Exception as e:
+                logger.error(f"Type text failed: {locator} - {str(e)}")
+                raise
     
-    def get_text(self, locator):
-        """Get text from element"""
-        try:
-            element = self.find_element(locator)
-            text = element.text
-            logger.debug(f"Got text from: {locator} - {text}")
-            return text
-        except Exception as e:
-            logger.error(f"Get text failed: {locator} - {str(e)}")
-            return None
+    def get_text(self, locator, retries=3):
+        """Get text from element with retry logic"""
+        from selenium.common.exceptions import StaleElementReferenceException
+        import time
+        for attempt in range(retries):
+            try:
+                element = self.find_element(locator)
+                text = element.text
+                logger.debug(f"Got text from: {locator} - {text}")
+                return text
+            except StaleElementReferenceException:
+                if attempt == retries - 1:
+                    logger.error(f"Get text failed due to stale element: {locator}")
+                    return None
+                time.sleep(0.5)
+            except Exception as e:
+                logger.error(f"Get text failed: {locator} - {str(e)}")
+                return None
     
     def wait_for_element_visible(self, locator, timeout=None):
         """Wait for element to be visible"""

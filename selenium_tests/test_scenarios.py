@@ -169,12 +169,8 @@ class TestCitizenWorkflows:
         
         login_page.wait_for_url_change(f"{TestConfig.FRONTEND_URL}/login")
         
-        import time
-        time.sleep(2)
-        
         # Navigate to complaint creation
         driver.get(f"{TestConfig.FRONTEND_URL}/complaints/create")
-        time.sleep(2)
         
         complaint_page = ComplaintCreationPage(driver, TestConfig)
         
@@ -187,12 +183,11 @@ class TestCitizenWorkflows:
                 priority="HIGH"
             )
             
-            time.sleep(3)
-            
-            if complaint_page.is_element_present(complaint_page.SUCCESS_MESSAGE):
+            try:
+                complaint_page.wait_for_element_visible(complaint_page.SUCCESS_MESSAGE)
                 test_context['actual_result'] = "Complaint submitted successfully"
                 test_context['status'] = "PASS"
-            else:
+            except Exception:
                 error_msg = complaint_page.get_error_message()
                 test_context['actual_result'] = error_msg or "Unknown error"
                 test_context['status'] = "FAIL"
@@ -219,21 +214,17 @@ class TestCitizenWorkflows:
         # Navigate to complaint creation
         driver.get(f"{TestConfig.FRONTEND_URL}/complaints/create")
         
-        import time
-        time.sleep(2)
-        
         complaint_page = ComplaintCreationPage(driver, TestConfig)
         
         try:
             # Try to submit without filling required fields
             complaint_page.click_submit()
             
-            time.sleep(1)
-            
-            if complaint_page.is_required_field_error_shown():
+            try:
+                complaint_page.wait_for_element_visible(complaint_page.REQUIRED_FIELD_ERROR, timeout=5)
                 test_context['actual_result'] = "Validation error shown for empty fields"
                 test_context['status'] = "PASS"
-            else:
+            except Exception:
                 test_context['actual_result'] = "No validation error shown"
                 test_context['status'] = "FAIL"
             
@@ -332,12 +323,11 @@ class TestUIUX:
             for width, height in test_sizes:
                 driver.set_window_size(width, height)
                 
-                import time
-                time.sleep(1)
-                
                 # Check if page is still usable
                 login_page = LoginPage(driver, TestConfig)
-                if not login_page.is_element_present(login_page.EMAIL_INPUT):
+                try:
+                    login_page.wait_for_element_visible(login_page.EMAIL_INPUT, timeout=2)
+                except Exception:
                     test_context['actual_result'] = f"Layout broken at {width}x{height}"
                     test_context['status'] = "FAIL"
                     return
@@ -356,8 +346,8 @@ class TestUIUX:
         try:
             driver.get(f"{TestConfig.FRONTEND_URL}/")
             
-            import time
-            time.sleep(2)
+            from selenium.webdriver.support.ui import WebDriverWait
+            WebDriverWait(driver, 5).until(lambda d: d.execute_script('return document.readyState') == 'complete')
             
             # Find all links
             links = driver.find_elements("tag name", "a")
@@ -368,7 +358,8 @@ class TestUIUX:
                     href = link.get_attribute("href")
                     if href and href.startswith("http"):
                         link.click()
-                        time.sleep(0.5)
+                        from selenium.webdriver.support.ui import WebDriverWait
+                        WebDriverWait(driver, 5).until(lambda d: d.execute_script('return document.readyState') == 'complete')
                         if driver.title == "404" or "error" in driver.current_url.lower():
                             broken_links.append(href)
                         driver.back()
