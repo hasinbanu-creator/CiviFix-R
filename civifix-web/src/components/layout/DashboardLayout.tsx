@@ -15,7 +15,11 @@ import {
   Bell,
   Building2,
   Map,
-  Users
+  Users,
+  Activity,
+  Settings,
+  PieChart,
+  UserCheck
 } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -33,12 +37,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { name: "Raise Complaint", href: "/complaints/create", icon: PlusCircle },
       { name: "My Complaints", href: "/complaints", icon: FileText },
+      { name: "Complaint Status", href: "/complaints/status", icon: Activity },
+      { name: "Notifications", href: "/notifications", icon: Bell },
       { name: "Profile", href: "/profile", icon: User },
     ];
   } else if (role === "INSPECTOR" || role === "WORKER") {
     navItems = [
       { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { name: "Complaints", href: "/complaints", icon: FileText },
+      { name: "Wards", href: "/wards", icon: Map },
       { name: "Profile", href: "/profile", icon: User },
     ];
   } else {
@@ -46,9 +53,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     navItems = [
       { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { name: "Complaints", href: "/complaints", icon: FileText },
+      { name: "Inspectors", href: "/inspectors", icon: UserCheck },
       { name: "Wards", href: "/wards", icon: Map },
+      { name: "Analytics", href: "/analytics", icon: PieChart },
       { name: "Users", href: "/users", icon: Users },
-      { name: "Profile", href: "/profile", icon: User },
+      { name: "Settings", href: "/settings", icon: Settings },
     ];
   }
 

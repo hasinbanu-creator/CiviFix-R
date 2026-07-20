@@ -191,32 +191,58 @@ function CitizenDashboard() {
         open: data.meta.status_counts.OPEN || 0,
         active: (data.meta.status_counts.WORKING || 0) + (data.meta.status_counts.APPROVAL || 0),
         closed: data.meta.status_counts.CLOSED || 0,
+        rejected: data.meta.status_counts.REJECTED || 0,
       };
     }
     return {
       open: complaints.filter((c: any) => c.status === "OPEN").length,
       active: complaints.filter((c: any) => ["WORKING", "APPROVAL"].includes(c.status)).length,
       closed: complaints.filter((c: any) => c.status === "CLOSED").length,
+      rejected: complaints.filter((c: any) => c.status === "REJECTED").length,
     };
   }, [complaints, data]);
+
+  const total = counts.open + counts.active + counts.closed + counts.rejected || 1;
+  const openPct = (counts.open / total) * 100;
+  const activePct = (counts.active / total) * 100;
+  const closedPct = (counts.closed / total) * 100;
+  const rejectedPct = (counts.rejected / total) * 100;
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* Profile Stats Row */}
-      <div className="bg-card rounded-3xl p-6 shadow-md border border-border mb-8 mt-[-3rem] relative z-10 mx-4 md:mx-0">
-        <div className="flex items-center justify-between">
-          <div className="flex-1 text-center border-r border-border">
-            <p className="text-3xl font-black text-foreground">{counts.open}</p>
+      <div className="bg-card/80 backdrop-blur-md rounded-3xl p-6 shadow-md border border-border mb-8 mt-[-3rem] relative z-10 mx-4 md:mx-0">
+        <div className="grid grid-cols-4 gap-4">
+          <div className="text-center border-r border-border">
+            <p className="text-3xl font-black text-accent">{counts.open}</p>
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Pending</p>
           </div>
-          <div className="flex-1 text-center border-r border-border">
-            <p className="text-3xl font-black text-foreground">{counts.active}</p>
+          <div className="text-center border-r border-border">
+            <p className="text-3xl font-black text-primary">{counts.active}</p>
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Active</p>
           </div>
-          <div className="flex-1 text-center">
-            <p className="text-3xl font-black text-foreground">{counts.closed}</p>
+          <div className="text-center border-r border-border">
+            <p className="text-3xl font-black text-success">{counts.closed}</p>
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Resolved</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl font-black text-destructive">{counts.rejected}</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Rejected</p>
+          </div>
+        </div>
+        
+        {/* Simple Progress Bar Chart */}
+        <div className="mt-6 pt-6 border-t border-border">
+          <div className="flex justify-between items-center mb-2">
+             <span className="text-sm font-bold text-foreground">Complaint Progress</span>
+             <span className="text-xs font-semibold text-muted-foreground">{total > 1 ? total : 0} Total</span>
+          </div>
+          <div className="w-full h-3 bg-muted rounded-full overflow-hidden flex shadow-inner">
+            <div style={{ width: `${openPct}%` }} className="bg-accent transition-all duration-1000"></div>
+            <div style={{ width: `${activePct}%` }} className="bg-primary transition-all duration-1000"></div>
+            <div style={{ width: `${closedPct}%` }} className="bg-success transition-all duration-1000"></div>
+            <div style={{ width: `${rejectedPct}%` }} className="bg-destructive transition-all duration-1000"></div>
           </div>
         </div>
       </div>

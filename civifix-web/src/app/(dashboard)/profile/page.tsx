@@ -200,7 +200,7 @@ export default function ProfilePage() {
         />
         <MenuItem 
           icon={Settings} 
-          title="Settings" 
+          title="Notification Settings" 
           subtitle="App preferences" 
           colorClass="text-secondary" 
           bgClass="bg-secondary/10" 
@@ -210,10 +210,17 @@ export default function ProfilePage() {
         <SectionLabel>Support</SectionLabel>
         <MenuItem 
           icon={HelpCircle} 
-          title="Help & Support" 
-          subtitle="FAQs, contact us" 
+          title="Help & FAQs" 
+          subtitle="Find answers quickly" 
           colorClass="text-success" 
           bgClass="bg-success/10" 
+        />
+        <MenuItem 
+          icon={Info} 
+          title="Contact Support" 
+          subtitle="Get in touch with us" 
+          colorClass="text-primary" 
+          bgClass="bg-primary/10" 
         />
         <MenuItem 
           icon={Info} 

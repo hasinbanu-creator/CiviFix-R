@@ -203,7 +203,7 @@ export default function ComplaintsListPage() {
               </Link>
             </div>
           ) : filteredComplaints.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center col-span-full">
+            <div className="flex flex-col items-center justify-center py-20 text-center col-span-full bg-card rounded-3xl border border-border shadow-sm">
               <Filter className="w-12 h-12 text-muted-foreground mb-6" />
               <p className="text-sm font-bold text-muted-foreground">No {activeFilter.toLowerCase().replace("_", " ")} complaints found.</p>
               <button 
@@ -214,6 +214,93 @@ export default function ComplaintsListPage() {
               </button>
             </div>
           ) : (
+            <>
+              {/* Desktop Data Table */}
+              <div className="hidden md:block col-span-full bg-card rounded-3xl shadow-sm border border-border overflow-hidden mb-6">
+                <div className="flex items-center justify-between p-6 border-b border-border">
+                  <div className="relative">
+                    <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input type="text" placeholder="Search complaints..." className="pl-10 pr-4 py-2 bg-muted rounded-full text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-64" />
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-border text-sm font-bold hover:bg-muted transition-colors">
+                      <Filter className="w-4 h-4" /> Filter
+                    </button>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-muted/50 border-b border-border text-muted-foreground text-xs font-bold uppercase tracking-wider">
+                        <th className="p-4 pl-6 font-semibold">ID</th>
+                        <th className="p-4 font-semibold">Type & Title</th>
+                        <th className="p-4 font-semibold">Location</th>
+                        <th className="p-4 font-semibold">Date</th>
+                        <th className="p-4 font-semibold">Status</th>
+                        <th className="p-4 pr-6 text-right font-semibold">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {filteredComplaints.map((complaint: any) => {
+                        const type = complaint.complaint_type || "OTHER";
+                        const meta = TYPE_META[type] || TYPE_META.OTHER;
+                        const status = STATUS_STYLES[complaint.status as string] || STATUS_STYLES.OPEN;
+                        const IconType = meta.icon;
+                        
+                        return (
+                          <tr key={complaint._id} className="hover:bg-muted/30 transition-colors group cursor-pointer" onClick={() => window.location.href=`/complaints/${complaint._id || complaint.complaint_id}`}>
+                            <td className="p-4 pl-6 text-sm font-bold text-foreground">
+                              {complaint.complaint_id || complaint._id?.substring(0,6).toUpperCase()}
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-xl ${meta.bg} flex items-center justify-center shrink-0`}>
+                                  <IconType className={`w-5 h-5 ${meta.color}`} />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-bold text-foreground">{complaint.title || meta.title}</p>
+                                  <p className="text-xs font-semibold text-muted-foreground">{meta.title}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4 text-sm font-medium text-muted-foreground truncate max-w-[200px]">
+                              {complaint.ward?.ward_name || complaint.address || "Location unavailable"}
+                            </td>
+                            <td className="p-4 text-sm font-bold text-muted-foreground">
+                              {new Date(complaint.created_at).toLocaleDateString()}
+                            </td>
+                            <td className="p-4">
+                              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${status.bg} ${status.color}`}>
+                                {status.label}
+                              </span>
+                              {complaint.priority && (
+                                <span className={`ml-2 px-2 py-1 rounded-full text-[10px] font-bold ${complaint.priority === 'HIGH' ? 'bg-destructive/10 text-destructive' : 'bg-muted text-muted-foreground'}`}>
+                                  {complaint.priority}
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-4 pr-6 text-right">
+                              <div className="w-8 h-8 rounded-full hover:bg-primary/10 flex items-center justify-center ml-auto transition-colors">
+                                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="p-4 border-t border-border flex items-center justify-between text-sm text-muted-foreground font-semibold">
+                   <span>Showing 1 to {filteredComplaints.length} of {filteredComplaints.length} entries</span>
+                   <div className="flex gap-1">
+                     <button className="px-3 py-1 border border-border rounded-lg hover:bg-muted disabled:opacity-50" disabled>Prev</button>
+                     <button className="px-3 py-1 border border-border rounded-lg hover:bg-muted disabled:opacity-50" disabled>Next</button>
+                   </div>
+                </div>
+              </div>
+              
+              {/* Mobile Cards (Hidden on desktop) */}
+              <div className="md:hidden grid grid-cols-1 gap-4 col-span-full">
             filteredComplaints.map((complaint: any) => {
               const type = complaint.complaint_type || "OTHER";
               const meta = TYPE_META[type] || TYPE_META.OTHER;
@@ -289,7 +376,9 @@ export default function ComplaintsListPage() {
                   </div>
                 </Link>
               );
-            })
+            })}
+            </div>
+          </>
           )}
         </div>
 

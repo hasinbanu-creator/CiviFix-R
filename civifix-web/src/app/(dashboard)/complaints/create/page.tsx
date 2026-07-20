@@ -63,6 +63,7 @@ export default function CreateComplaintPage() {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdComplaint, setCreatedComplaint] = useState<any>(null);
+  const [step, setStep] = useState(1);
   const { data: wardsData, isLoading: wardsLoading } = useWards(user?.district || user?.district_id);
   const wards = wardsData?.data || [];
   const createComplaint = useCreateComplaint();
@@ -190,192 +191,270 @@ export default function CreateComplaintPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10 pb-12">
+        <div className="bg-card rounded-[2rem] p-6 shadow-md border border-border mb-6">
+          <div className="flex justify-between items-center relative">
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-muted z-0">
+               <div className="h-full bg-primary transition-all duration-500" style={{ width: step === 1 ? '0%' : step === 2 ? '50%' : '100%' }}></div>
+            </div>
+            {[1, 2, 3].map((s) => (
+              <div key={s} className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${step >= s ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30' : 'bg-muted text-muted-foreground border-2 border-border'}`}>
+                {s}
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between mt-3 px-1 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+            <span className={step >= 1 ? 'text-primary' : ''}>Issue</span>
+            <span className={step >= 2 ? 'text-primary' : ''}>Location</span>
+            <span className={step >= 3 ? 'text-primary' : ''}>Review</span>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* Section 1: What's the issue */}
-          <div className="bg-card rounded-[2rem] p-6 shadow-sm border border-border">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
-                <AlertCircle className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-foreground">What&apos;s the issue?</h2>
-                <p className="text-xs font-semibold text-muted-foreground">Type, description and priority</p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Complaint Type</label>
-                <div className="relative">
-                  <select
-                    value={form.complaint_type}
-                    onChange={(e) => updateField("complaint_type", e.target.value)}
-                    className={`w-full appearance-none bg-muted/30 border-2 ${errors.complaint_type ? 'border-destructive' : 'border-border'} rounded-2xl px-5 py-4 text-sm font-bold text-foreground outline-none focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10 transition-all duration-200`}
-                  >
-                    <option value="" disabled>Select a category</option>
-                    {COMPLAINT_TYPES.map(t => (
-                      <option key={t.value} value={t.value}>{t.label}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+          {/* Step 1: What's the issue */}
+          <div className={`transition-all duration-500 ${step === 1 ? 'block animate-in fade-in slide-in-from-right-4' : 'hidden'}`}>
+            <div className="bg-card rounded-[2rem] p-6 shadow-sm border border-border">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6" />
                 </div>
-                {errors.complaint_type && <p className="text-destructive text-xs font-bold mt-1.5 ml-1">{errors.complaint_type}</p>}
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Description</label>
-                <textarea
-                  value={form.description}
-                  onChange={(e) => updateField("description", e.target.value)}
-                  placeholder="Describe the issue clearly (min 10 characters)"
-                  rows={4}
-                  className={`w-full bg-muted/30 border-2 ${errors.description ? 'border-destructive' : 'border-border'} rounded-2xl px-5 py-4 text-sm font-medium text-foreground outline-none focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10 transition-all duration-200 resize-none`}
-                />
-                {errors.description && <p className="text-destructive text-xs font-bold mt-1.5 ml-1">{errors.description}</p>}
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-3 uppercase">Priority</label>
-                <div className="flex gap-3">
-                  {PRIORITIES.map(p => {
-                    const isSelected = form.priority === p.value;
-                    const Icon = p.icon;
-                    return (
-                      <button
-                        key={p.value}
-                        type="button"
-                        onClick={() => updateField("priority", p.value)}
-                        className={`flex-1 flex flex-col items-center gap-2 py-4 border-2 rounded-2xl transition-all duration-200 ${
-                          isSelected ? `${p.bg} ${p.border} ${p.color} ring-4 ring-${p.color.split('-')[1]}/10` : 'border-border bg-card text-muted-foreground hover:bg-muted/50'
-                        }`}
-                      >
-                        <Icon className="w-6 h-6" />
-                        <span className="text-xs font-extrabold">{p.label}</span>
-                      </button>
-                    );
-                  })}
+                <div>
+                  <h2 className="text-lg font-bold text-foreground">What&apos;s the issue?</h2>
+                  <p className="text-xs font-semibold text-muted-foreground">Type, description and priority</p>
                 </div>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Complaint Type</label>
+                  <div className="relative">
+                    <select
+                      value={form.complaint_type}
+                      onChange={(e) => updateField("complaint_type", e.target.value)}
+                      className={`w-full appearance-none bg-muted/30 border-2 ${errors.complaint_type ? 'border-destructive' : 'border-border'} rounded-2xl px-5 py-4 text-sm font-bold text-foreground outline-none focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10 transition-all duration-200`}
+                    >
+                      <option value="" disabled>Select a category</option>
+                      {COMPLAINT_TYPES.map(t => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+                  </div>
+                  {errors.complaint_type && <p className="text-destructive text-xs font-bold mt-1.5 ml-1">{errors.complaint_type}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Description</label>
+                  <textarea
+                    value={form.description}
+                    onChange={(e) => updateField("description", e.target.value)}
+                    placeholder="Describe the issue clearly (min 10 characters)"
+                    rows={4}
+                    className={`w-full bg-muted/30 border-2 ${errors.description ? 'border-destructive' : 'border-border'} rounded-2xl px-5 py-4 text-sm font-medium text-foreground outline-none focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10 transition-all duration-200 resize-none`}
+                  />
+                  {errors.description && <p className="text-destructive text-xs font-bold mt-1.5 ml-1">{errors.description}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-3 uppercase">Priority</label>
+                  <div className="flex gap-3">
+                    {PRIORITIES.map(p => {
+                      const isSelected = form.priority === p.value;
+                      const Icon = p.icon;
+                      return (
+                        <button
+                          key={p.value}
+                          type="button"
+                          onClick={() => updateField("priority", p.value)}
+                          className={`flex-1 flex flex-col items-center gap-2 py-4 border-2 rounded-2xl transition-all duration-200 ${
+                            isSelected ? `${p.bg} ${p.border} ${p.color} ring-4 ring-${p.color.split('-')[1]}/10` : 'border-border bg-card text-muted-foreground hover:bg-muted/50'
+                          }`}
+                        >
+                          <Icon className="w-6 h-6" />
+                          <span className="text-xs font-extrabold">{p.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-8 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    let isValid = true;
+                    if (!form.complaint_type) { updateField("complaint_type", ""); isValid = false; }
+                    if (form.description.length < 10) { updateField("description", ""); isValid = false; }
+                    if (isValid) setStep(2);
+                  }}
+                  className="py-4 px-8 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl font-black text-sm tracking-wide shadow-md shadow-primary/20 transition-all hover:-translate-y-0.5"
+                >
+                  Continue
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Section 2: Where is it */}
-          <div className="bg-card rounded-[2rem] p-6 shadow-sm border border-border">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
-                <MapPin className="w-6 h-6" />
+          {/* Step 2: Where is it */}
+          <div className={`transition-all duration-500 ${step === 2 ? 'block animate-in fade-in slide-in-from-right-4' : 'hidden'}`}>
+            <div className="bg-card rounded-[2rem] p-6 shadow-sm border border-border">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                  <MapPin className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-foreground">Where is it?</h2>
+                  <p className="text-xs font-semibold text-muted-foreground">Ward, address & GPS location</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg font-bold text-foreground">Where is it?</h2>
-                <p className="text-xs font-semibold text-muted-foreground">Ward, address & GPS location</p>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Ward</label>
+                  <div className="relative">
+                    <select
+                      value={form.ward_id}
+                      onChange={(e) => updateField("ward_id", e.target.value)}
+                      disabled={wardsLoading}
+                      className={`w-full appearance-none bg-muted/30 border-2 ${errors.ward_id ? 'border-destructive' : 'border-border'} rounded-2xl px-5 py-4 text-sm font-bold text-foreground outline-none focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10 transition-all duration-200 disabled:opacity-50`}
+                    >
+                      <option value="" disabled>{wardsLoading ? "Loading wards..." : "Select your ward"}</option>
+                      {wards.map((w: any) => (
+                        <option key={w._id} value={w._id}>{w.ward_name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+                  </div>
+                  {errors.ward_id && <p className="text-destructive text-xs font-bold mt-1.5 ml-1">{errors.ward_id}</p>}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleGetLocation}
+                  disabled={gpsLoading}
+                  className="w-full flex items-center justify-center gap-2 py-4 bg-primary/10 text-primary hover:bg-primary/20 border-2 border-primary/20 rounded-2xl transition-all duration-200 font-bold text-sm"
+                >
+                  <Navigation className={`w-5 h-5 ${gpsLoading ? 'animate-spin' : ''}`} />
+                  {gpsLoading ? "Getting location..." : "Use my current location"}
+                </button>
+
+                {(form.latitude || form.longitude) && (
+                  <div className="flex items-center gap-3 bg-success/10 border border-success/30 rounded-2xl p-4">
+                    <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
+                    <span className="flex-1 text-sm font-bold text-success truncate">
+                      {form.latitude}, {form.longitude}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => { updateField("latitude", ""); updateField("longitude", ""); }}
+                      className="p-1 hover:bg-success/20 rounded-lg text-success"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Address / Landmark</label>
+                  <input
+                    type="text"
+                    value={form.address}
+                    onChange={(e) => updateField("address", e.target.value)}
+                    placeholder="e.g. Near post office, Main Road"
+                    className="w-full bg-muted/30 border-2 border-border rounded-2xl px-5 py-4 text-sm font-medium text-foreground outline-none focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10 transition-all duration-200"
+                  />
+                </div>
+              </div>
+              
+              <div className="mt-8 flex justify-between">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="py-4 px-6 bg-muted hover:bg-muted/80 text-foreground rounded-2xl font-black text-sm tracking-wide transition-all"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    let isValid = true;
+                    if (!form.ward_id) { updateField("ward_id", ""); isValid = false; }
+                    if (isValid) setStep(3);
+                  }}
+                  className="py-4 px-8 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl font-black text-sm tracking-wide shadow-md shadow-primary/20 transition-all hover:-translate-y-0.5"
+                >
+                  Continue
+                </button>
               </div>
             </div>
+          </div>
 
-            <div className="space-y-6">
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Ward</label>
-                <div className="relative">
-                  <select
-                    value={form.ward_id}
-                    onChange={(e) => updateField("ward_id", e.target.value)}
-                    disabled={wardsLoading}
-                    className={`w-full appearance-none bg-muted/30 border-2 ${errors.ward_id ? 'border-destructive' : 'border-border'} rounded-2xl px-5 py-4 text-sm font-bold text-foreground outline-none focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10 transition-all duration-200 disabled:opacity-50`}
-                  >
-                    <option value="" disabled>{wardsLoading ? "Loading wards..." : "Select your ward"}</option>
-                    {wards.map((w: any) => (
-                      <option key={w._id} value={w._id}>{w.ward_name}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+          {/* Step 3: Additional info & Review */}
+          <div className={`transition-all duration-500 ${step === 3 ? 'block animate-in fade-in slide-in-from-right-4' : 'hidden'}`}>
+            <div className="bg-card rounded-[2rem] p-6 shadow-sm border border-border">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                  <FileText className="w-6 h-6" />
                 </div>
-                {errors.ward_id && <p className="text-destructive text-xs font-bold mt-1.5 ml-1">{errors.ward_id}</p>}
+                <div>
+                  <h2 className="text-lg font-bold text-foreground">Review & Submit</h2>
+                  <p className="text-xs font-semibold text-muted-foreground">Add any final notes</p>
+                </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleGetLocation}
-                disabled={gpsLoading}
-                className="w-full flex items-center justify-center gap-2 py-4 bg-primary/10 text-primary hover:bg-primary/20 border-2 border-primary/20 rounded-2xl transition-all duration-200 font-bold text-sm"
-              >
-                <Navigation className={`w-5 h-5 ${gpsLoading ? 'animate-spin' : ''}`} />
-                {gpsLoading ? "Getting location..." : "Use my current location"}
-              </button>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Citizen Note (Optional)</label>
+                <textarea
+                  value={form.citizen_note}
+                  onChange={(e) => updateField("citizen_note", e.target.value)}
+                  placeholder="Anything else we should know?"
+                  rows={3}
+                  className="w-full bg-muted/30 border-2 border-border rounded-2xl px-5 py-4 text-sm font-medium text-foreground outline-none focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10 transition-all duration-200 resize-none"
+                />
+              </div>
+              
+              <div className="mt-6 bg-muted/50 rounded-2xl p-4 border border-border/50">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Summary</p>
+                <div className="space-y-2 text-sm font-medium">
+                   <div className="flex justify-between"><span className="text-muted-foreground">Type:</span> <span className="text-foreground">{COMPLAINT_TYPES.find(t=>t.value===form.complaint_type)?.label}</span></div>
+                   <div className="flex justify-between"><span className="text-muted-foreground">Priority:</span> <span className="text-foreground">{form.priority}</span></div>
+                   <div className="flex justify-between"><span className="text-muted-foreground">Ward:</span> <span className="text-foreground truncate ml-4">{wards.find((w:any)=>w._id===form.ward_id)?.ward_name}</span></div>
+                </div>
+              </div>
 
-              {(form.latitude || form.longitude) && (
-                <div className="flex items-center gap-3 bg-success/10 border border-success/30 rounded-2xl p-4">
-                  <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-                  <span className="flex-1 text-sm font-bold text-success truncate">
-                    {form.latitude}, {form.longitude}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => { updateField("latitude", ""); updateField("longitude", ""); }}
-                    className="p-1 hover:bg-success/20 rounded-lg text-success"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+              {serverError && (
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm font-bold p-5 rounded-2xl flex items-center gap-3 mt-6">
+                  <AlertCircle className="w-6 h-6 shrink-0" />
+                  {serverError}
                 </div>
               )}
-
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Address / Landmark</label>
-                <input
-                  type="text"
-                  value={form.address}
-                  onChange={(e) => updateField("address", e.target.value)}
-                  placeholder="e.g. Near post office, Main Road"
-                  className="w-full bg-muted/30 border-2 border-border rounded-2xl px-5 py-4 text-sm font-medium text-foreground outline-none focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10 transition-all duration-200"
-                />
+              
+              <div className="mt-8 flex justify-between gap-4">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="py-4 px-6 bg-muted hover:bg-muted/80 text-foreground rounded-2xl font-black text-sm tracking-wide transition-all"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 py-4 bg-primary hover:bg-primary/90 disabled:opacity-70 text-primary-foreground rounded-2xl font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-md shadow-primary/20 transition-all hover:-translate-y-0.5"
+                >
+                  {loading ? (
+                    <span>Submitting...</span>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      Submit Complaint
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
-
-          {/* Section 3: Additional info */}
-          <div className="bg-card rounded-[2rem] p-6 shadow-sm border border-border">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
-                <FileText className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-foreground">Additional info</h2>
-                <p className="text-xs font-semibold text-muted-foreground">Optional — any extra context</p>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Citizen Note</label>
-              <textarea
-                value={form.citizen_note}
-                onChange={(e) => updateField("citizen_note", e.target.value)}
-                placeholder="Anything else we should know?"
-                rows={3}
-                className="w-full bg-muted/30 border-2 border-border rounded-2xl px-5 py-4 text-sm font-medium text-foreground outline-none focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10 transition-all duration-200 resize-none"
-              />
-            </div>
-          </div>
-
-          {serverError && (
-            <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm font-bold p-5 rounded-2xl flex items-center gap-3">
-              <AlertCircle className="w-6 h-6 shrink-0" />
-              {serverError}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 bg-primary hover:bg-primary/90 disabled:opacity-70 text-primary-foreground rounded-2xl font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-md shadow-primary/20 transition-all duration-200 hover:-translate-y-0.5"
-          >
-            {loading ? (
-              <span>Submitting...</span>
-            ) : (
-              <>
-                <Send className="w-5 h-5" />
-                Submit Complaint
-              </>
-            )}
-          </button>
         </form>
       </div>
     </div>
