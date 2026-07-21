@@ -172,10 +172,10 @@ function LoginPage() {
     };
     const maskedEmail = email.replace(/(.{2})(.*)(@.*)/, (_, a, b, c)=>a + "*".repeat(b.length) + c);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "min-h-screen bg-slate-50 flex flex-col md:flex-row",
+        className: "min-h-screen bg-background flex flex-col md:flex-row",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "relative bg-blue-600 overflow-hidden flex-col justify-end w-full md:w-1/2 lg:w-[45%] flex transition-all duration-500 ease-in-out ".concat(step === "OTP" ? "h-[200px] md:h-auto" : "h-[340px] md:h-auto"),
+                className: "relative bg-primary overflow-hidden flex-col justify-end w-full md:w-1/2 lg:w-[45%] flex transition-all duration-500 ease-in-out ".concat(step === "OTP" ? "h-[200px] md:h-auto" : "h-[340px] md:h-auto"),
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "absolute w-44 h-44 rounded-full border-[40px] border-white/10 -top-12 -right-10"
@@ -222,7 +222,7 @@ function LoginPage() {
                                     className: "flex-1",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                                            className: "text-white text-2xl md:text-3xl font-extrabold tracking-tight",
+                                            className: "text-white text-2xl md:text-3xl font-bold tracking-tight",
                                             children: "Verify OTP"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/login/page.tsx",
@@ -267,13 +267,13 @@ function LoginPage() {
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "flex justify-center md:justify-start",
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-black/10 overflow-hidden",
+                                        className: "w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-black/10 overflow-hidden p-2",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                             src: "/logo.png",
                                             alt: "CiviFix Logo",
                                             width: 80,
                                             height: 80,
-                                            className: "object-cover"
+                                            className: "object-contain"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/login/page.tsx",
                                             lineNumber: 192,
@@ -293,7 +293,7 @@ function LoginPage() {
                                     className: "mt-auto",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                                            className: "text-white text-2xl md:text-4xl font-extrabold leading-tight tracking-tight mb-2",
+                                            className: "text-white text-3xl md:text-5xl font-black leading-tight tracking-tight mb-2",
                                             children: [
                                                 "India's #1 Civic",
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
@@ -309,7 +309,7 @@ function LoginPage() {
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-white/80 text-sm md:text-base font-medium tracking-wide",
+                                            className: "text-white/80 text-sm md:text-base font-semibold tracking-wide mt-2",
                                             children: "Report. Track. Resolve."
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/login/page.tsx",
@@ -336,10 +336,10 @@ function LoginPage() {
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "flex-1 bg-white flex flex-col px-6 py-8 md:p-12 lg:p-16 rounded-t-3xl md:rounded-t-none -mt-6 md:mt-0 z-20",
+                className: "flex-1 bg-card flex flex-col px-6 py-8 md:p-12 lg:p-16 rounded-t-[40px] md:rounded-t-none -mt-8 md:mt-0 z-20 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)]",
                 children: [
                     step === "EMAIL" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "flex-1 flex flex-col justify-between max-w-md mx-auto w-full",
+                        className: "flex-1 flex flex-col justify-between max-w-md mx-auto w-full pt-4",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 children: [
@@ -347,14 +347,14 @@ function LoginPage() {
                                         className: "flex items-center gap-4 mb-8",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "flex-1 h-px bg-slate-100"
+                                                className: "flex-1 h-px bg-border"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
                                                 lineNumber: 215,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                className: "text-sm font-semibold text-slate-400 tracking-wide",
+                                                className: "text-sm font-bold text-muted-foreground tracking-wide",
                                                 children: "Log in or sign up"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
@@ -362,7 +362,7 @@ function LoginPage() {
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "flex-1 h-px bg-slate-100"
+                                                className: "flex-1 h-px bg-border"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
                                                 lineNumber: 217,
@@ -382,7 +382,7 @@ function LoginPage() {
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                                         htmlFor: "email-input",
-                                                        className: "block text-xs font-bold text-slate-500 tracking-wider mb-2",
+                                                        className: "block text-xs font-bold text-muted-foreground tracking-wider mb-2",
                                                         children: "EMAIL ADDRESS"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/login/page.tsx",
@@ -390,10 +390,10 @@ function LoginPage() {
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                        className: "flex items-center gap-3 border-2 rounded-xl px-4 py-3 bg-slate-50 transition-colors ".concat(emailError ? 'border-red-500' : 'border-slate-100 focus-within:border-blue-500 focus-within:bg-white'),
+                                                        className: "flex items-center gap-3 border-2 rounded-2xl px-5 py-3.5 bg-muted/30 transition-all duration-200 ".concat(emailError ? 'border-destructive bg-destructive/5' : 'border-border focus-within:border-primary focus-within:bg-card focus-within:ring-4 focus-within:ring-primary/10'),
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mail$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Mail$3e$__["Mail"], {
-                                                                className: "w-5 h-5 text-slate-400"
+                                                                className: "w-5 h-5 text-muted-foreground"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/login/page.tsx",
                                                                 lineNumber: 226,
@@ -408,7 +408,7 @@ function LoginPage() {
                                                                     if (emailError) setEmailError("");
                                                                 },
                                                                 placeholder: "Enter your email address",
-                                                                className: "flex-1 bg-transparent border-none outline-none text-slate-800 text-sm",
+                                                                className: "flex-1 bg-transparent border-none outline-none text-foreground text-sm font-medium",
                                                                 autoCapitalize: "none",
                                                                 autoCorrect: "off"
                                                             }, void 0, false, {
@@ -423,7 +423,7 @@ function LoginPage() {
                                                         columnNumber: 19
                                                     }, this),
                                                     emailError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: "text-red-500 text-xs mt-1.5 ml-1 font-medium",
+                                                        className: "text-destructive text-xs mt-1.5 ml-1 font-bold",
                                                         children: emailError
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/login/page.tsx",
@@ -437,7 +437,7 @@ function LoginPage() {
                                                 columnNumber: 17
                                             }, this),
                                             authError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                className: "text-red-500 text-sm text-center font-medium",
+                                                className: "text-destructive text-sm text-center font-bold",
                                                 children: authError
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
@@ -447,7 +447,7 @@ function LoginPage() {
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                 type: "submit",
                                                 disabled: loading,
-                                                className: "w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-extrabold text-sm py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-blue-500/25",
+                                                className: "w-full bg-primary hover:bg-primary/90 disabled:opacity-70 text-primary-foreground font-bold text-sm py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md shadow-primary/20 mt-2",
                                                 children: loading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                     className: "tracking-widest",
                                                     children: "SENDING OTP..."
@@ -466,7 +466,7 @@ function LoginPage() {
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$arrow$2d$right$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ArrowRight$3e$__["ArrowRight"], {
-                                                            className: "w-4 h-4"
+                                                            className: "w-5 h-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/login/page.tsx",
                                                             lineNumber: 256,
@@ -489,7 +489,7 @@ function LoginPage() {
                                         className: "mt-12",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                className: "text-center text-sm font-medium text-slate-400 mb-6",
+                                                className: "text-center text-sm font-bold text-muted-foreground mb-6",
                                                 children: "or continue with"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
@@ -500,9 +500,9 @@ function LoginPage() {
                                                 className: "flex gap-4",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                                        className: "flex-1 border-2 border-slate-100 rounded-xl py-3 flex items-center justify-center hover:bg-slate-50 transition-colors",
+                                                        className: "flex-1 border-2 border-border rounded-2xl py-3 flex items-center justify-center hover:bg-muted/50 transition-colors",
                                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
-                                                            className: "w-5 h-5",
+                                                            className: "w-6 h-6",
                                                             viewBox: "0 0 24 24",
                                                             children: [
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
@@ -557,9 +557,9 @@ function LoginPage() {
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                                        className: "flex-1 border-2 border-slate-100 rounded-xl py-3 flex items-center justify-center hover:bg-slate-50 transition-colors",
+                                                        className: "flex-1 border-2 border-border rounded-2xl py-3 flex items-center justify-center hover:bg-muted/50 transition-colors",
                                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
-                                                            className: "w-5 h-5",
+                                                            className: "w-6 h-6",
                                                             viewBox: "0 0 24 24",
                                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                                                                 fill: "#000000",
@@ -586,10 +586,10 @@ function LoginPage() {
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "mt-8 flex items-center justify-center gap-2",
+                                                className: "mt-10 flex items-center justify-center gap-2",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                        className: "text-sm font-medium text-slate-500",
+                                                        className: "text-sm font-semibold text-muted-foreground",
                                                         children: "Don't have an account?"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/login/page.tsx",
@@ -598,7 +598,7 @@ function LoginPage() {
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                         onClick: ()=>router.push("/signup"),
-                                                        className: "text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors",
+                                                        className: "text-sm font-bold text-primary hover:text-primary/80 transition-colors",
                                                         children: "Sign Up"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/login/page.tsx",
@@ -626,7 +626,7 @@ function LoginPage() {
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "mt-8 text-center",
                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "text-[11px] text-slate-400 leading-relaxed font-medium",
+                                    className: "text-[11px] text-muted-foreground leading-relaxed font-semibold",
                                     children: [
                                         "By continuing, you agree to our",
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
@@ -636,7 +636,7 @@ function LoginPage() {
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                             href: "#",
-                                            className: "text-slate-500 underline decoration-slate-300 underline-offset-2",
+                                            className: "text-foreground underline decoration-muted-foreground underline-offset-2",
                                             children: "Terms of Service"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/login/page.tsx",
@@ -646,7 +646,7 @@ function LoginPage() {
                                         "  ·  ",
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                             href: "#",
-                                            className: "text-slate-500 underline decoration-slate-300 underline-offset-2",
+                                            className: "text-foreground underline decoration-muted-foreground underline-offset-2",
                                             children: "Privacy Policy"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/login/page.tsx",
@@ -656,7 +656,7 @@ function LoginPage() {
                                         "  ·  ",
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                             href: "#",
-                                            className: "text-slate-500 underline decoration-slate-300 underline-offset-2",
+                                            className: "text-foreground underline decoration-muted-foreground underline-offset-2",
                                             children: "Content Policies"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/login/page.tsx",
@@ -684,12 +684,12 @@ function LoginPage() {
                         className: "flex-1 flex flex-col max-w-md mx-auto w-full pt-4",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "flex items-center gap-4 bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6",
+                                className: "flex items-center gap-4 bg-primary/5 border border-primary/10 rounded-2xl p-4 mb-8",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm",
+                                        className: "w-12 h-12 bg-card rounded-xl flex items-center justify-center shadow-sm border border-border",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$mail$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Mail$3e$__["Mail"], {
-                                            className: "w-6 h-6 text-blue-600"
+                                            className: "w-6 h-6 text-primary"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/login/page.tsx",
                                             lineNumber: 303,
@@ -703,7 +703,7 @@ function LoginPage() {
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                className: "text-xs font-semibold text-slate-500 tracking-wide mb-0.5",
+                                                className: "text-xs font-bold text-muted-foreground tracking-wide mb-0.5",
                                                 children: "OTP sent to"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
@@ -711,7 +711,7 @@ function LoginPage() {
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                className: "text-sm font-bold text-slate-800",
+                                                className: "text-sm font-black text-foreground",
                                                 children: maskedEmail
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
@@ -731,15 +731,15 @@ function LoginPage() {
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "bg-white rounded-3xl p-6 shadow-xl shadow-slate-200/50 border border-slate-100",
+                                className: "bg-card rounded-[2rem] p-6 shadow-sm border border-border",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "flex items-center gap-3 mb-6",
+                                        className: "flex items-center gap-3 mb-8",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center",
+                                                className: "w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center",
                                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$shield$2d$half$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ShieldHalf$3e$__["ShieldHalf"], {
-                                                    className: "w-4 h-4 text-blue-600"
+                                                    className: "w-5 h-5 text-primary"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/login/page.tsx",
                                                     lineNumber: 314,
@@ -751,7 +751,7 @@ function LoginPage() {
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                                className: "text-sm font-bold text-slate-800 tracking-wide",
+                                                className: "text-base font-bold text-foreground tracking-wide",
                                                 children: "Enter 6-digit OTP"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
@@ -765,7 +765,7 @@ function LoginPage() {
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "flex justify-between gap-2 mb-6",
+                                        className: "flex justify-between gap-2 mb-8",
                                         children: otp.map((digit, idx)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                 ref: (el)=>{
                                                     inputRefs.current[idx] = el;
@@ -776,7 +776,7 @@ function LoginPage() {
                                                 value: digit,
                                                 onChange: (e)=>handleOtpChange(e.target.value, idx),
                                                 onKeyDown: (e)=>handleKeyDown(e, idx),
-                                                className: "w-full aspect-[0.85] text-center text-xl font-extrabold rounded-xl border-2 outline-none transition-all\n                      ".concat(digit ? 'border-blue-600 bg-blue-50 text-blue-600' : idx === otp.findIndex((d)=>d === "") ? 'border-blue-600 bg-white' : otpError || authError ? 'border-red-500 bg-red-50 text-red-600' : 'border-slate-200 bg-slate-50 text-slate-800', "\n                    ")
+                                                className: "w-full aspect-[0.85] text-center text-2xl font-black rounded-2xl border-2 outline-none transition-all duration-200\n                      ".concat(digit ? 'border-primary bg-primary/5 text-primary' : idx === otp.findIndex((d)=>d === "") ? 'border-primary bg-card ring-4 ring-primary/10' : otpError || authError ? 'border-destructive bg-destructive/5 text-destructive' : 'border-border bg-muted/30 text-foreground', "\n                    ")
                                             }, idx, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
                                                 lineNumber: 321,
@@ -791,14 +791,14 @@ function LoginPage() {
                                         className: "flex items-center justify-center gap-2 mb-6",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__["AlertCircle"], {
-                                                className: "w-4 h-4 text-red-500"
+                                                className: "w-4 h-4 text-destructive"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
                                                 lineNumber: 341,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                className: "text-xs text-red-500 font-medium",
+                                                className: "text-xs text-destructive font-bold",
                                                 children: otpError || authError
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/login/page.tsx",
@@ -815,7 +815,7 @@ function LoginPage() {
                                         children: canResend ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                             onClick: handleResend,
                                             disabled: resending,
-                                            className: "flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-full transition-colors font-bold text-sm",
+                                            className: "flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-5 py-2.5 rounded-full transition-colors font-bold text-sm",
                                             children: resending ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__["RefreshCw"], {
@@ -856,11 +856,11 @@ function LoginPage() {
                                             lineNumber: 347,
                                             columnNumber: 21
                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-sm text-slate-500 font-medium",
+                                            className: "text-sm text-muted-foreground font-semibold",
                                             children: [
                                                 "Resend in ",
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    className: "text-blue-600 font-bold",
+                                                    className: "text-primary font-bold",
                                                     children: timerLabel
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/login/page.tsx",
@@ -881,7 +881,7 @@ function LoginPage() {
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                         onClick: handleVerify,
                                         disabled: !isComplete || loading,
-                                        className: "w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 text-white font-extrabold text-sm py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-blue-500/25 mb-4",
+                                        className: "w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary text-primary-foreground font-bold text-sm py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md shadow-primary/20 mb-4 mt-2",
                                         children: loading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             children: "VERIFYING..."
                                         }, void 0, false, {
@@ -899,7 +899,7 @@ function LoginPage() {
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$log$2d$in$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__LogIn$3e$__["LogIn"], {
-                                                    className: "w-4 h-4"
+                                                    className: "w-5 h-5"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/login/page.tsx",
                                                     lineNumber: 382,
@@ -913,7 +913,7 @@ function LoginPage() {
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-center text-xs text-slate-400 font-medium",
+                                        className: "text-center text-xs text-muted-foreground font-semibold",
                                         children: "Didn't get the email? Check your spam folder."
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/login/page.tsx",
@@ -927,10 +927,10 @@ function LoginPage() {
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "mt-8 flex justify-center items-center gap-1",
+                                className: "mt-10 flex justify-center items-center gap-2",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                        className: "text-sm text-slate-400 font-medium",
+                                        className: "text-sm text-muted-foreground font-semibold",
                                         children: "Wrong email?"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/login/page.tsx",
@@ -939,7 +939,7 @@ function LoginPage() {
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                         onClick: ()=>setStep("EMAIL"),
-                                        className: "text-sm font-extrabold text-blue-600 hover:text-blue-700",
+                                        className: "text-sm font-bold text-primary hover:text-primary/80 transition-colors",
                                         children: "Go back & change"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/login/page.tsx",

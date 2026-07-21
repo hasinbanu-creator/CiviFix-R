@@ -172,6 +172,7 @@ async def login(payload: LoginSchema):
         
         # Send OTP email
         otp = result.get("otp")
+        print(f"\n========================================\n[DEV ONLY] LOGIN OTP FOR {payload.email}: {otp}\n========================================\n", flush=True)
         email_sent = await EmailService.send_login_otp_email(payload.email, otp)
         if not email_sent:
             return ResponseHandler.error(

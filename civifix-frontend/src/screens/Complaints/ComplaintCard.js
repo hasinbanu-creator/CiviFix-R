@@ -46,10 +46,13 @@ export const ComplaintCard = ({ complaint, onPress }) => {
   const typeMeta  = TYPE_META[type] || TYPE_META.OTHER;
   const status    = STATUS[complaint?.status] || STATUS.OPEN;
   const title     = formatType(complaint?.complaint_type || complaint?.title || "Complaint");
-  const desc      = complaint?.description || complaint?.address || "No description provided";
+  
+  const address   = complaint?.address || "Address not provided";
   const id        = complaint?.complaint_id || complaint?._id || "";
   const date      = formatDate(complaint?.created_at || complaint?.createdAt);
-  const ward      = complaint?.ward_name || complaint?.ward || null;
+  const ward      = complaint?.ward_id?.ward_name || complaint?.ward_name || complaint?.ward || "Ward not provided";
+  const citizen   = complaint?.user_id?.name || complaint?.citizen_name || "Citizen";
+  const priority  = complaint?.priority || "MEDIUM";
 
   return (
     <TouchableOpacity
@@ -109,51 +112,33 @@ export const ComplaintCard = ({ complaint, onPress }) => {
           </View>
         </View>
 
-        {/* Description */}
-          <Text numberOfLines={2} style={{
-          fontSize: FONT_SIZES.xs,
-          color: "#64748B",
-          lineHeight: 17,
-          marginBottom: SPACING.sm,
-          paddingLeft: SPACING.xxl, // align under title
-        }}>
-          {desc}
-        </Text>
-
-        {/* Bottom row: ID + ward + date */}
-        <View style={{
-          flexDirection: "row", alignItems: "center",
-          paddingLeft: SPACING.xxl,
-          gap: SPACING.sm,
-        }}>
-          {!!id && (
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Icon name="pound" size={10} color="#94A3B8" />
-              <Text style={{ color: "#94A3B8", fontSize: 10, fontWeight: "700", marginLeft: SPACING.xs }}>
-                {id}
-              </Text>
+        <View style={{ paddingLeft: SPACING.xxl, marginTop: SPACING.xs }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: SPACING.md }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Icon name="identifier" size={14} color="#64748B" />
+              <Text style={{ color: "#64748B", fontSize: FONT_SIZES.xs }}>{id}</Text>
             </View>
-          )}
-          {!!ward && (
-            <>
-              <Text style={{ color: "#CBD5E1", fontSize: 10 }}>·</Text>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Icon name="map-marker-outline" size={10} color="#94A3B8" />
-                <Text style={{ color: "#94A3B8", fontSize: 10, marginLeft: SPACING.xs }}>{ward}</Text>
-              </View>
-            </>
-          )}
-          {!!date && (
-            <>
-              <Text style={{ color: "#CBD5E1", fontSize: 10 }}>·</Text>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Icon name="calendar-outline" size={10} color="#94A3B8" />
-                <Text style={{ color: "#94A3B8", fontSize: 10, marginLeft: SPACING.xs }}>{date}</Text>
-              </View>
-            </>
-          )}
-          <View style={{ flex: 1 }} />
-          <Icon name="chevron-right" size={14} color="#CBD5E1" />
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Icon name="flag-outline" size={14} color={priority === "HIGH" ? "#DC2626" : priority === "MEDIUM" ? "#D97706" : "#059669"} />
+              <Text style={{ color: "#64748B", fontSize: FONT_SIZES.xs }}>{priority}</Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Icon name="account-outline" size={14} color="#64748B" />
+              <Text style={{ color: "#64748B", fontSize: FONT_SIZES.xs }}>{citizen}</Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Icon name="calendar-outline" size={14} color="#64748B" />
+              <Text style={{ color: "#64748B", fontSize: FONT_SIZES.xs }}>{date}</Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Icon name="map-marker-outline" size={14} color="#64748B" />
+              <Text style={{ color: "#64748B", fontSize: FONT_SIZES.xs }}>{ward}</Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4, width: "100%", marginTop: 2 }}>
+              <Icon name="map-marker-radius-outline" size={14} color="#64748B" />
+              <Text numberOfLines={1} style={{ color: "#64748B", fontSize: FONT_SIZES.xs, flex: 1 }}>{address}</Text>
+            </View>
+          </View>
         </View>
       </View>
     </TouchableOpacity>

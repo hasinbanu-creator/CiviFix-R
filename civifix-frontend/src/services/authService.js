@@ -111,36 +111,38 @@ export const authService = {
 
   // ─── SUPER ADMIN ─────────────────────────────────────────────────────────────
   getAdminStats: async () => {
-    const res = await api.get("/api/v1/admin/stats");
+    const res = await api.get("/admin/stats");
     return unwrapResponse(res);
   },
 
   // ─── DISTRICT ADMIN ──────────────────────────────────────────────────────────
   getInspectors: async () => {
-    const res = await api.get("/api/v1/admin/inspectors");
+    const res = await api.get("/admin/inspectors");
     return unwrapResponse(res);
   },
 
   getWorkers: async () => {
-    const res = await api.get("/api/v1/admin/workers");
+    const res = await api.get("/admin/workers");
     return unwrapResponse(res);
   },
 
   getDistrictUsers: async () => {
-    const res = await api.get("/api/v1/admin/users");
+    const res = await api.get("/admin/users");
     return unwrapResponse(res);
   },
 
   // ─── INSPECTOR ───────────────────────────────────────────────────────────────
-  getWardComplaints: async ({ page = 1, limit = 20, status } = {}) => {
+  getWardComplaints: async ({ page = 1, limit = 20, status, district_id, ward_id } = {}) => {
     const params = { page, limit };
     if (status) params.status = status;
-    const res = await api.get("/api/v1/inspector/complaints", { params });
+    if (district_id) params.district_id = district_id;
+    if (ward_id) params.ward_id = ward_id;
+    const res = await api.get("/inspector/complaints", { params });
     return unwrapResponse(res);
   },
 
   getWardWorkers: async () => {
-    const res = await api.get("/api/v1/inspector/workers");
+    const res = await api.get("/inspector/workers");
     return unwrapResponse(res);
   },
 
@@ -148,7 +150,7 @@ export const authService = {
   getAssignedComplaints: async ({ page = 1, limit = 20, status } = {}) => {
     const params = { page, limit };
     if (status) params.status = status;
-    const res = await api.get("/api/v1/worker/complaints", { params });
+    const res = await api.get("/worker/complaints", { params });
     return unwrapResponse(res);
   },
 
@@ -158,6 +160,20 @@ export const authService = {
     });
     return unwrapResponse(res);
   },
+
+  /**
+   * Get ALL wards for the authenticated inspector's district.
+   * Calls GET /api/v1/wards — backend reads district from JWT token.
+   * Response after unwrapResponse: { data: Ward[], total, page, limit, pages }
+   */
+  getAllWards: async ({ page = 1, limit = 100 } = {}) => {
+    console.log("[getAllWards] Calling GET /wards, page:", page, "limit:", limit);
+    const res = await api.get("/wards", { params: { page, limit } });
+    const result = unwrapResponse(res);
+    console.log("[getAllWards] Response:", JSON.stringify(result)?.substring(0, 200));
+    return result;
+  },
+
 
   // ─── WARD MANAGEMENT ─────────────────────────────────────────────────────────
   getWards: async ({ page = 1, limit = 20, is_active = true } = {}) => {
@@ -245,6 +261,22 @@ export const authService = {
       },
     });
     return unwrapResponse(response);
+  },
+
+  // ─── INSPECTOR COMPLAINT ACTIONS ─────────────────────────────────────────────
+  inspectorStartWork: async (complaintId) => {
+    const res = await api.put(`/inspector/complaints/${complaintId}/start-work`);
+    return unwrapResponse(res);
+  },
+
+  inspectorRejectComplaint: async (complaintId) => {
+    const res = await api.put(`/inspector/complaints/${complaintId}/reject`);
+    return unwrapResponse(res);
+  },
+
+  inspectorResolveComplaint: async (complaintId) => {
+    const res = await api.put(`/inspector/complaints/${complaintId}/resolve`);
+    return unwrapResponse(res);
   },
 };
 

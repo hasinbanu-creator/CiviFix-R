@@ -91,30 +91,58 @@ async def get_inspector_dashboard(current_user: Dict[str, Any] = Depends(get_cur
 async def get_ward_complaints(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
-    status: str = Query(None, description="Comma-separated statuses"),
+    status_filter: str = Query(None, alias="status", description="Comma-separated statuses"),
     priority: str = Query(None),
     search_query: str = Query(None),
+    district_id: str = Query(None),
+    ward_id: str = Query(None),
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
-    """Get complaints for inspector's ward with advanced filters"""
+    """Get complaints for a ward — filters by district_id and/or ward_id only (no inspector_id filter)"""
     try:
-        # Get inspector's ward
-        ward = await db.wards.find_one({
-            "inspector_id": ObjectId(current_user["user_id"]),
-            "is_active": True
-        })
+        query = {}
 
-        if not ward:
-            return ResponseHandler.error(
-                message="Inspector not assigned to any ward",
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
-        query = {
-            "ward_id": ward["_id"]
-        }
-        
-        if status:
-            statuses = [s.strip() for s in status.split(',')]
+        # Resolve district_id (accepts both ObjectId string and district name)
+        if district_id:
+            try:
+                query["district_id"] = ObjectId(district_id)
+                logger.info(f"[complaints] district_id resolved to ObjectId: {district_id}")
+            except Exception:
+                district_doc = await db.districts.find_one({"name": district_id})
+                if district_doc:
+                    query["district_id"] = district_doc["_id"]
+                    logger.info(f"[complaints] district name '{district_id}' resolved to ObjectId: {district_doc['_id']}")
+                else:
+                    logger.warning(f"[complaints] district '{district_id}' not found — ignoring filter")
+
+        # Resolve ward_id
+        if ward_id:
+            try:
+                query["ward_id"] = ObjectId(ward_id)
+                logger.info(f"[complaints] ward_id set to: {ward_id}")
+            except Exception:
+                logger.warning(f"[complaints] Invalid ward_id '{ward_id}' — cannot convert to ObjectId")
+
+        # Only fallback to inspector's assigned ward if NOTHING was specified
+        if not district_id and not ward_id:
+            logger.info("[complaints] No district_id or ward_id provided; falling back to inspector's assigned ward")
+            ward = await db.wards.find_one({
+                "inspector_id": ObjectId(current_user["user_id"]),
+                "is_active": True
+            })
+            if ward:
+                query["ward_id"] = ward["_id"]
+                logger.info(f"[complaints] Fallback ward_id: {ward['_id']}")
+            else:
+                logger.warning("[complaints] Inspector not assigned to any ward and no ward_id provided")
+                return ResponseHandler.success(
+                    message="No ward assigned to inspector",
+                    data={"complaints": [], "page": page, "limit": limit, "total": 0, "pages": 0,
+                          "stats": {"total": 0, "pending": 0, "in_progress": 0, "resolved": 0, "rejected": 0}}
+                )
+
+        if status_filter:
+            statuses = [s.strip() for s in status_filter.split(',')]
             query["status"] = {"$in": statuses}
             
         if priority:
@@ -129,6 +157,7 @@ async def get_ward_complaints(
             ]
 
         skip = (page - 1) * limit
+        logger.info(f"[complaints] MongoDB query: {query}, skip={skip}, limit={limit}")
         complaints = await db.complaints.find(query)\
             .sort("created_at", -1)\
             .skip(skip)\
@@ -136,20 +165,72 @@ async def get_ward_complaints(
             .to_list(length=limit)
 
         total = await db.complaints.count_documents(query)
+        logger.info(f"[complaints] Returned {len(complaints)} complaints, total matching: {total}")
+
+        # Collect unique user_ids and ward_ids to batch query them
+        user_ids = list(set(c.get("user_id") for c in complaints if c.get("user_id")))
+        ward_ids = list(set(c.get("ward_id") for c in complaints if c.get("ward_id")))
+        
+        users_map = {}
+        if user_ids:
+            users = await db.users.find({"_id": {"$in": user_ids}}).to_list(length=len(user_ids))
+            users_map = {str(u["_id"]): u for u in users}
+            
+        wards_map = {}
+        if ward_ids:
+            wards = await db.wards.find({"_id": {"$in": ward_ids}}).to_list(length=len(ward_ids))
+            wards_map = {str(w["_id"]): w for w in wards}
 
         result = []
         for complaint in complaints:
+            citizen_id_str = str(complaint.get("user_id")) if complaint.get("user_id") else None
+            ward_id_str = str(complaint.get("ward_id")) if complaint.get("ward_id") else None
+            
+            citizen_data = users_map.get(citizen_id_str) if citizen_id_str else None
+            ward_data = wards_map.get(ward_id_str) if ward_id_str else None
+            
             result.append({
                 "_id": str(complaint["_id"]),
                 "complaint_id": complaint.get("complaint_id"),
                 "title": complaint.get("title", complaint.get("complaint_type", "")),
+                "complaint_type": complaint.get("complaint_type"),
                 "description": complaint.get("description"),
                 "status": complaint.get("status"),
                 "priority": complaint.get("priority", "MEDIUM"),
-                "location": complaint.get("location"),
+                "address": complaint.get("address"),
+                "latitude": complaint.get("latitude"),
+                "longitude": complaint.get("longitude"),
                 "created_at": complaint.get("created_at").isoformat() if complaint.get("created_at") else None,
-                "updated_at": complaint.get("updated_at").isoformat() if complaint.get("updated_at") else None
+                "updated_at": complaint.get("updated_at").isoformat() if complaint.get("updated_at") else None,
+                "citizen": {
+                    "name": citizen_data.get("name") if citizen_data else "Citizen"
+                } if citizen_data else None,
+                "ward": {
+                    "ward_name": ward_data.get("ward_name") if ward_data else None,
+                    "ward_number": ward_data.get("ward_number") if ward_data else None
+                } if ward_data else None
             })
+
+        # Calculate statistics based on filtered ward/district
+        stats_query = {}
+        if "district_id" in query:
+            stats_query["district_id"] = query["district_id"]
+        if "ward_id" in query:
+            stats_query["ward_id"] = query["ward_id"]
+
+        total_count = await db.complaints.count_documents(stats_query)
+        pending_count = await db.complaints.count_documents({**stats_query, "status": {"$in": ["PENDING", "OPEN"]}})
+        in_progress_count = await db.complaints.count_documents({**stats_query, "status": {"$in": ["IN_PROGRESS", "WORKING", "ACCEPTED", "FIELD_VISIT", "APPROVAL"]}})
+        resolved_count = await db.complaints.count_documents({**stats_query, "status": {"$in": ["RESOLVED", "CLOSED"]}})
+        rejected_count = await db.complaints.count_documents({**stats_query, "status": "REJECTED"})
+
+        stats_data = {
+            "total": total_count,
+            "pending": pending_count,
+            "in_progress": in_progress_count,
+            "resolved": resolved_count,
+            "rejected": rejected_count
+        }
 
         return ResponseHandler.success(
             message="Complaints retrieved",
@@ -158,7 +239,8 @@ async def get_ward_complaints(
                 "page": page,
                 "limit": limit,
                 "total": total,
-                "pages": (total + limit - 1) // limit
+                "pages": (total + limit - 1) // limit,
+                "stats": stats_data
             }
         )
     except Exception as e:

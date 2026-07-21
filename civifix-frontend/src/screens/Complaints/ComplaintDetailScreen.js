@@ -15,6 +15,7 @@ import {
 import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
 import authService from "../../services/authService";
 import { getErrorMessage } from "../../services/api";
+import { AuthContext } from "../../context/AuthContext";
 import { SPACING } from "../../constants/theme";
 
 import { API_URL } from "../../constants/endpoints";
@@ -185,25 +186,42 @@ function HistoryItem({ item, complaint, isLast }) {
 /* ── Main Screen ── */
 export const ComplaintDetailScreen = ({ route, navigation }) => {
   const initialComplaint = route.params?.complaint;
+  const passedId = route.params?.complaintId;
   const [complaint, setComplaint] = useState(initialComplaint);
-  const [loading, setLoading]     = useState(Boolean(initialComplaint?._id));
+  
+  const complaintId = passedId || initialComplaint?._id || initialComplaint?.complaint_id;
+  const [loading, setLoading]     = useState(Boolean(complaintId));
   const [error, setError]         = useState("");
   
+  console.log("[ComplaintDetailScreen] Initialized with route.params:", route.params);
+  console.log("[ComplaintDetailScreen] Derived complaintId:", complaintId);
+
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [reopenReason, setReopenReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const complaintId = initialComplaint?._id || initialComplaint?.complaint_id;
+  const { user } = useContext(AuthContext);
+  const isCitizen = user?.role === "CITIZEN";
+  const isInspector = user?.role === "INSPECTOR";
 
   useEffect(() => {
     const load = async () => {
-      if (!complaintId) { setLoading(false); return; }
+      console.log("[ComplaintDetailScreen] useEffect triggered for complaintId:", complaintId);
+      if (!complaintId) { 
+        console.log("[ComplaintDetailScreen] No complaintId found, skipping fetch.");
+        setLoading(false); 
+        return; 
+      }
       try {
+        setLoading(true);
         setError("");
+        console.log(`[ComplaintDetailScreen] Fetching complaint using authService.getComplaint(${complaintId})`);
         const data = await authService.getComplaint(complaintId);
+        console.log("[ComplaintDetailScreen] Fetched complaint data:", data?._id || data?.complaint_id);
         setComplaint(data);
       } catch (err) {
+        console.error("[ComplaintDetailScreen] Error fetching complaint:", err);
         setError(getErrorMessage(err, "Unable to load complaint details"));
       } finally {
         setLoading(false);
@@ -239,6 +257,48 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
       setComplaint(data);
     } catch (err) {
       alert(getErrorMessage(err, "Failed to reopen complaint"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleAccept = async () => {
+    try {
+      setSubmitting(true);
+      await authService.inspectorStartWork(complaintId);
+      alert("Complaint accepted and is now IN PROGRESS!");
+      const data = await authService.getComplaint(complaintId);
+      setComplaint(data);
+    } catch (err) {
+      alert(getErrorMessage(err, "Failed to accept complaint"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      setSubmitting(true);
+      await authService.inspectorRejectComplaint(complaintId);
+      alert("Complaint rejected!");
+      const data = await authService.getComplaint(complaintId);
+      setComplaint(data);
+    } catch (err) {
+      alert(getErrorMessage(err, "Failed to reject complaint"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleResolve = async () => {
+    try {
+      setSubmitting(true);
+      await authService.inspectorResolveComplaint(complaintId);
+      alert("Complaint resolved!");
+      const data = await authService.getComplaint(complaintId);
+      setComplaint(data);
+    } catch (err) {
+      alert(getErrorMessage(err, "Failed to resolve complaint"));
     } finally {
       setSubmitting(false);
     }
@@ -332,7 +392,7 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
           </View>
 
           {/* ── FEEDBACK & RATING (If CLOSED/RESOLVED) ── */}
-          {complaint && ["closed", "resolved"].includes(complaint.status?.toLowerCase()) && !complaint.rating && (
+          {isCitizen && complaint && ["closed", "resolved"].includes(complaint.status?.toLowerCase()) && !complaint.rating && (
             <View style={styles.card}>
               <SectionTitle title="Feedback & Rating" icon="star-outline" />
               <View style={styles.ratingRow}>
@@ -358,7 +418,7 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
           )}
 
           {/* ── ALREADY RATED ── */}
-          {complaint?.rating && (
+          {isCitizen && complaint?.rating && (
             <View style={styles.card}>
               <SectionTitle title="Your Feedback" icon="star-check-outline" />
               <View style={styles.ratingRow}>
@@ -371,7 +431,7 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
           )}
 
           {/* ── REOPEN COMPLAINT (If CLOSED/RESOLVED) ── */}
-          {complaint && ["closed", "resolved"].includes(complaint.status?.toLowerCase()) && (
+          {isCitizen && complaint && ["closed", "resolved"].includes(complaint.status?.toLowerCase()) && (
             <View style={styles.card}>
               <SectionTitle title="Issue not fixed?" icon="refresh" />
               <TextInput
@@ -386,6 +446,31 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
               <TouchableOpacity style={[styles.actionBtn, { backgroundColor: ERROR }]} onPress={handleReopen} disabled={submitting}>
                 {submitting ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.actionBtnText}>Reopen Complaint</Text>}
               </TouchableOpacity>
+            </View>
+          )}
+
+          {/* ── INSPECTOR ACTIONS ── */}
+          {isInspector && complaint && (
+            <View style={styles.card}>
+              <SectionTitle title="Inspector Actions" icon="shield-check" />
+              {["new", "open"].includes(complaint.status?.toLowerCase()) && (
+                <View style={{ flexDirection: "row", gap: SPACING.md }}>
+                  <TouchableOpacity style={[styles.actionBtn, { flex: 1, backgroundColor: "#059669" }]} onPress={handleAccept} disabled={submitting}>
+                    {submitting ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.actionBtnText}>Accept</Text>}
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.actionBtn, { flex: 1, backgroundColor: ERROR }]} onPress={handleReject} disabled={submitting}>
+                    {submitting ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.actionBtnText}>Reject</Text>}
+                  </TouchableOpacity>
+                </View>
+              )}
+              {["in_progress", "working"].includes(complaint.status?.toLowerCase()) && (
+                <TouchableOpacity style={[styles.actionBtn, { backgroundColor: "#059669" }]} onPress={handleResolve} disabled={submitting}>
+                  {submitting ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.actionBtnText}>Resolve</Text>}
+                </TouchableOpacity>
+              )}
+              {["resolved", "closed", "rejected"].includes(complaint.status?.toLowerCase()) && (
+                <Text style={{ color: GRAY_500, fontSize: 14, textAlign: "center", fontStyle: "italic" }}>No actions available.</Text>
+              )}
             </View>
           )}
 

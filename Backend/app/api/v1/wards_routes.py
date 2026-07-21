@@ -31,6 +31,85 @@ def get_ward_service(db=Depends(get_database)):
     return WardService(ward_repo, user_repo, district_repo)
 
 
+@router.get(
+    "",
+    response_model=dict,
+    summary="List All Wards (Inspector)",
+    tags=["Ward Management"]
+)
+async def list_all_wards(
+    page: int = Query(1, ge=1),
+    limit: int = Query(100, ge=1, le=200),
+    is_active: bool = Query(None),
+    district_id: str = Query(None, description="District name or ObjectId; defaults to inspector's district from token"),
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Return all wards.
+    If district_id query param is provided, filter by that district.
+    Otherwise use the district from the JWT token (user.district).
+    No inspector_id filtering is applied.
+    """
+    try:
+        # Determine district filter value
+        district_filter = district_id or current_user.get("district")
+        logger.info(f"[wards] Listing wards for district='{district_filter}', page={page}, limit={limit}")
+
+        # Resolve district name -> ObjectId
+        resolved_district_id = None
+        if district_filter:
+            try:
+                resolved_district_id = ObjectId(district_filter)
+                logger.info(f"[wards] District resolved as ObjectId: {resolved_district_id}")
+            except Exception:
+                from app.db.mongodb import db as motor_db
+                district_doc = await motor_db.districts.find_one({"name": district_filter})
+                if district_doc:
+                    resolved_district_id = district_doc["_id"]
+                    logger.info(f"[wards] District name '{district_filter}' resolved to ObjectId: {resolved_district_id}")
+                else:
+                    logger.warning(f"[wards] District '{district_filter}' not found in DB")
+
+        query = {}
+        if resolved_district_id:
+            query["district_id"] = resolved_district_id
+        if is_active is not None:
+            query["is_active"] = is_active
+
+        from app.db.mongodb import db as motor_db
+        skip = (page - 1) * limit
+        total = await motor_db.wards.count_documents(query)
+        wards = await motor_db.wards.find(query).sort("ward_number", 1).skip(skip).limit(limit).to_list(length=limit)
+
+        logger.info(f"[wards] Query: {query} -> returned {len(wards)} wards (total: {total})")
+
+        result = []
+        for w in wards:
+            result.append({
+                "_id": str(w["_id"]),
+                "ward_name": w.get("ward_name"),
+                "ward_number": w.get("ward_number"),
+                "district_id": str(w.get("district_id", "")),
+                "label": w.get("label") or f"{w.get('ward_number', '')} - {w.get('ward_name', '')}",
+                "is_active": w.get("is_active", True),
+            })
+
+        return {
+            "success": True,
+            "message": "Wards fetched successfully",
+            "data": {
+                "data": result,
+                "total": total,
+                "page": page,
+                "limit": limit,
+                "pages": (total + limit - 1) // limit,
+            }
+        }
+    except Exception as e:
+        logger.error(f"[wards] Error listing wards: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to list wards: {str(e)}")
+
+
 @router.post(
     "",
     response_model=dict,

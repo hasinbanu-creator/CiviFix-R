@@ -69,7 +69,20 @@ class WardRepository:
     ) -> tuple[List[dict], int]:
         """List wards by district with pagination"""
         try:
-            query = {"district_id": ObjectId(district_id)}
+            try:
+                resolved_id = ObjectId(district_id)
+            except Exception:
+                # Resolve by name
+                district_doc = await self.db["districts"].find_one({"name": district_id})
+                if district_doc:
+                    resolved_id = district_doc["_id"]
+                else:
+                    resolved_id = None
+            
+            if not resolved_id:
+                return [], 0
+
+            query = {"district_id": resolved_id}
             
             if is_active is not None:
                 query["is_active"] = is_active

@@ -16,6 +16,7 @@ import authService from "../../services/authService";
 import { AuthContext } from "../../context/AuthContext";
 import { getErrorMessage } from "../../services/api";
 import ComplaintCard from "./ComplaintCard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── TOKENS ───────────────────────────────────────────────────────────────────
 const PRIMARY       = "#2563EB";
@@ -71,19 +72,21 @@ const extractComplaints = (payload) => {
 };
 
 // ─── EMPTY STATE ──────────────────────────────────────────────────────────────
-const EmptyState = ({ onPress }) => (
+const EmptyState = ({ onPress, isInspector }) => (
   <View style={styles.emptyWrap}>
     <View style={styles.emptyIconWrap}>
       <Icon name="clipboard-text-outline" size={40} color={GRAY_400} />
     </View>
-    <Text style={styles.emptyTitle}>No complaints yet</Text>
+    <Text style={styles.emptyTitle}>No complaints found</Text>
     <Text style={styles.emptySub}>
-      Raise your first civic issue and follow its status right here.
+      {isInspector ? "There are no complaints assigned to this ward yet." : "Raise your first civic issue and follow its status right here."}
     </Text>
-    <TouchableOpacity style={styles.emptyBtn} onPress={onPress} activeOpacity={0.85}>
-      <Icon name="plus" size={18} color="#fff" />
-      <Text style={styles.emptyBtnText}>Raise a Complaint</Text>
-    </TouchableOpacity>
+    {!isInspector && (
+      <TouchableOpacity style={styles.emptyBtn} onPress={onPress} activeOpacity={0.85}>
+        <Icon name="plus" size={18} color="#fff" />
+        <Text style={styles.emptyBtnText}>Raise a Complaint</Text>
+      </TouchableOpacity>
+    )}
   </View>
 );
 
@@ -197,7 +200,8 @@ export const ComplaintsListScreen = ({ navigation }) => {
       
       let payload;
       if (user?.role === "INSPECTOR") {
-        payload = await authService.getWardComplaints({ page: pageNum, limit: 10 });
+        const wardId = await AsyncStorage.getItem("inspectorSelectedWardId");
+        payload = await authService.getWardComplaints({ page: pageNum, limit: 10, ward_id: wardId });
       } else if (user?.role === "WORKER") {
         payload = await authService.getAssignedComplaints({ page: pageNum, limit: 10 });
       } else {
@@ -340,7 +344,7 @@ export const ComplaintsListScreen = ({ navigation }) => {
           }
           ListEmptyComponent={
             complaints.length === 0
-              ? <EmptyState onPress={() => navigation.navigate("CreateComplaint")} />
+              ? <EmptyState onPress={() => navigation.navigate("CreateComplaint")} isInspector={user?.role === "INSPECTOR"} />
               : (
                 <View style={styles.filterEmptyWrap}>
                   <Icon name="filter-off-outline" size={32} color={GRAY_400} />
@@ -356,7 +360,10 @@ export const ComplaintsListScreen = ({ navigation }) => {
           renderItem={({ item }) => (
             <ComplaintCard
               complaint={item}
-              onPress={() => navigation.navigate("ComplaintDetail", { complaint: item })}
+              onPress={() => {
+                console.log("[ComplaintsListScreen] Complaint pressed:", item._id || item.complaint_id);
+                navigation.navigate("ComplaintDetail", { complaint: item, complaintId: item._id || item.complaint_id });
+              }}
             />
           )}
           ItemSeparatorComponent={() => <View style={{ height: 10 }} />}

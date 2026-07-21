@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
+import authService from "@/services/auth";
 import { 
   FlaskConical, 
   Search, 
@@ -119,7 +120,7 @@ function ComplaintItem({ complaint, index, total }: any) {
         
         {isInspector ? (
           <div className="mt-1.5 space-y-1.5">
-            <p className="text-sm font-medium text-muted-foreground truncate">{complaint.address || desc}</p>
+            <p className="text-sm font-medium text-muted-foreground truncate">Location: <span className="text-foreground">{complaint.address || desc}</span></p>
             {complaint.ward?.ward_name && (
               <p className="text-xs font-semibold text-muted-foreground">Ward: <span className="text-foreground">{complaint.ward.ward_name}</span></p>
             )}
@@ -129,7 +130,11 @@ function ComplaintItem({ complaint, index, total }: any) {
               </span>
               <span className="w-1 h-1 rounded-full bg-border"></span>
               <span className="text-xs font-bold text-foreground">
-                {complaint.citizen?.name || "Citizen"}
+                Citizen: {complaint.citizen?.name || "Citizen"}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-border"></span>
+              <span className="text-xs font-bold text-foreground">
+                Category: {meta.title}
               </span>
             </div>
             {complaint.created_at && (
@@ -282,29 +287,154 @@ function CitizenDashboard() {
 }
 
 function InspectorDashboard() {
-  const { data, isLoading } = useInspectorDashboard();
+  const { user } = useAuth();
+  const [wards, setWards] = useState<any[]>([]);
+  const [selectedWardId, setSelectedWardId] = useState<string>("");
+  const [complaints, setComplaints] = useState<any[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [stats, setStats] = useState<any>({
+    total: 0,
+    pending: 0,
+    in_progress: 0,
+    resolved: 0,
+    rejected: 0
+  });
+  const [isLoadingWards, setIsLoadingWards] = useState<boolean>(true);
+  const [isLoadingComplaints, setIsLoadingComplaints] = useState<boolean>(false);
 
-  if (isLoading) {
+  // ── Load ALL wards via GET /api/v1/wards ──────────────────────────────────
+  useEffect(() => {
+    async function loadWards() {
+      setIsLoadingWards(true);
+      setLoadError(null);
+      try {
+        console.debug("[InspectorDashboard] user:", user);
+        console.debug("[InspectorDashboard] Calling getAllWards()...");
+
+        const res = await authService.getAllWards({ limit: 100 });
+
+        console.debug("[InspectorDashboard] getAllWards raw response:", res);
+
+        // Response shape after unwrapResponse: { data: [...], total, page, limit, pages }
+        // OR directly an array if something changes
+        let wardsList: any[] = [];
+        if (Array.isArray(res)) {
+          wardsList = res;
+        } else if (Array.isArray(res?.data)) {
+          wardsList = res.data;
+        } else if (Array.isArray(res?.wards)) {
+          wardsList = res.wards;
+        }
+
+        console.debug(`[InspectorDashboard] Parsed ${wardsList.length} wards from response`);
+
+        setWards(wardsList);
+
+        if (wardsList.length > 0) {
+          const firstId = wardsList[0]._id || wardsList[0].id || "";
+          console.debug("[InspectorDashboard] Auto-selecting first ward:", firstId, wardsList[0]);
+          setSelectedWardId(firstId);
+        } else {
+          console.warn("[InspectorDashboard] No wards returned — ward dropdown will be empty");
+        }
+      } catch (error: any) {
+        console.error("[InspectorDashboard] getAllWards() failed:", error?.message || error);
+        setLoadError("Failed to load wards. Please refresh.");
+      } finally {
+        setIsLoadingWards(false);
+      }
+    }
+    loadWards();
+    // Only run once on mount — user context won't change the ward list
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Load complaints whenever selectedWardId changes ───────────────────────
+  useEffect(() => {
+    async function loadComplaintsAndStats() {
+      if (!selectedWardId) {
+        console.debug("[InspectorDashboard] No ward selected yet — skipping complaints load");
+        return;
+      }
+
+      setIsLoadingComplaints(true);
+      try {
+        console.debug(`[InspectorDashboard] Loading complaints for ward_id=${selectedWardId}`);
+
+        const res = await authService.getWardComplaints({
+          ward_id: selectedWardId,
+          limit: 100,
+        });
+
+        console.debug("[InspectorDashboard] getWardComplaints raw response:", res);
+
+        const complaintsList = res?.complaints || res?.data || (Array.isArray(res) ? res : []);
+        console.debug(`[InspectorDashboard] Parsed ${complaintsList.length} complaints`);
+        setComplaints(complaintsList);
+
+        if (res?.stats) {
+          console.debug("[InspectorDashboard] Stats:", res.stats);
+          setStats(res.stats);
+        } else {
+          // Compute stats client-side if backend didn't return them
+          const total = complaintsList.length;
+          const pending = complaintsList.filter((c: any) => ["OPEN", "PENDING"].includes(c.status)).length;
+          const in_progress = complaintsList.filter((c: any) => ["IN_PROGRESS", "WORKING", "ACCEPTED", "FIELD_VISIT", "APPROVAL"].includes(c.status)).length;
+          const resolved = complaintsList.filter((c: any) => ["RESOLVED", "CLOSED"].includes(c.status)).length;
+          const rejected = complaintsList.filter((c: any) => c.status === "REJECTED").length;
+          setStats({ total, pending, in_progress, resolved, rejected });
+        }
+      } catch (error: any) {
+        console.error("[InspectorDashboard] getWardComplaints() failed:", error?.message || error);
+        setComplaints([]);
+      } finally {
+        setIsLoadingComplaints(false);
+      }
+    }
+
+    loadComplaintsAndStats();
+  }, [selectedWardId]);
+
+  if (isLoadingWards) {
     return (
-      <div className="p-10 flex justify-center">
+      <div className="p-10 flex flex-col items-center gap-3">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-sm font-medium text-muted-foreground">Loading wards…</p>
       </div>
     );
   }
 
-  if (!data) {
+  if (loadError) {
+    return (
+      <div className="p-10 text-center flex flex-col items-center">
+        <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
+          <AlertCircle className="w-8 h-8 text-destructive" />
+        </div>
+        <p className="text-base font-bold text-foreground">Ward Load Error</p>
+        <p className="text-sm font-medium text-muted-foreground mt-1">{loadError}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 rounded-xl bg-primary text-white text-sm font-bold"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (wards.length === 0) {
     return (
       <div className="p-10 text-center flex flex-col items-center">
          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
             <ClipboardList className="w-8 h-8 text-muted-foreground" />
          </div>
-         <p className="text-base font-bold text-foreground">No data available</p>
+         <p className="text-base font-bold text-foreground">No wards available</p>
+         <p className="text-sm font-medium text-muted-foreground mt-1">There are no wards in your district.</p>
       </div>
     );
   }
 
-  const complaints = data.recent_complaints || [];
-  const stats = data.stats || {};
+  const selectedWard = wards.find(w => (w._id || w.id) === selectedWardId);
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -313,56 +443,84 @@ function InspectorDashboard() {
       <div className="bg-card rounded-3xl p-6 shadow-md border border-border mb-8 mt-[-3rem] relative z-10 mx-4 md:mx-0">
         <div className="flex items-center justify-between">
           <div className="flex-1 text-center border-r border-border">
-            <p className="text-3xl font-black text-foreground">{stats.total_complaints || 0}</p>
+            <p className="text-3xl font-black text-foreground">{stats.total || 0}</p>
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Total</p>
           </div>
           <div className="flex-1 text-center border-r border-border">
-            <p className="text-3xl font-black text-foreground">{stats.pending || 0}</p>
+            <p className="text-3xl font-black text-accent">{stats.pending || 0}</p>
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Pending</p>
           </div>
-          <div className="flex-1 text-center">
-            <p className="text-3xl font-black text-foreground">{stats.resolved_complaints || stats.resolved || 0}</p>
+          <div className="flex-1 text-center border-r border-border">
+            <p className="text-3xl font-black text-primary">{stats.in_progress || 0}</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">In Progress</p>
+          </div>
+          <div className="flex-1 text-center border-r border-border">
+            <p className="text-3xl font-black text-success">{stats.resolved || 0}</p>
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Resolved</p>
+          </div>
+          <div className="flex-1 text-center">
+            <p className="text-3xl font-black text-destructive">{stats.rejected || 0}</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Rejected</p>
           </div>
         </div>
       </div>
 
       <div className="px-4 md:px-0">
-        {data.ward_info && (
-          <div className="mb-8 bg-card rounded-3xl p-6 shadow-sm border border-border flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-foreground mb-1">{data.ward_info.ward_name}</h3>
-              <p className="text-sm font-medium text-muted-foreground">Ward Number: <span className="font-bold text-foreground">#{data.ward_info.ward_number}</span></p>
-            </div>
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-              <Map className="w-6 h-6 text-primary" />
-            </div>
+        {/* Ward selection dropdown */}
+        <div className="mb-8 bg-card rounded-3xl p-6 shadow-sm border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-bold text-foreground mb-1">Select Ward</h3>
+            <p className="text-sm font-medium text-muted-foreground">
+              {selectedWard ? `${selectedWard.ward_name} (Ward #${selectedWard.ward_number})` : "No ward selected"}
+            </p>
           </div>
-        )}
+          <div className="flex items-center gap-3">
+            <select
+              value={selectedWardId}
+              onChange={(e) => setSelectedWardId(e.target.value)}
+              className="bg-muted text-foreground font-semibold text-sm px-4 py-2.5 rounded-2xl border border-border focus:outline-none focus:ring-2 focus:ring-primary min-w-[200px]"
+            >
+              <option value="" disabled>Select a Ward</option>
+              {wards.map((ward) => (
+                <option key={ward._id || ward.id} value={ward._id || ward.id}>
+                  {ward.ward_name} (Ward #{ward.ward_number})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         <SectionTitle left="Complaint Overview" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <MetricCard icon={ClipboardList} value={stats.total || 0} label="Total" colorClass="text-foreground" bgClass="bg-card/80 border border-border" />
           <MetricCard icon={AlertCircle} value={stats.pending || 0} label="Pending" colorClass="text-accent" bgClass="bg-accent/10" />
           <MetricCard icon={Wrench} value={stats.in_progress || 0} label="In Progress" colorClass="text-primary" bgClass="bg-primary/10" />
-          <MetricCard icon={Eye} value={data.pending_approvals || stats.for_review || 0} label="For Review" colorClass="text-secondary" bgClass="bg-secondary/10" />
-          <MetricCard icon={CheckCircle2} value={stats.resolved_complaints || stats.resolved || 0} label="Resolved" colorClass="text-success" bgClass="bg-success/10" />
+          <MetricCard icon={CheckCircle2} value={stats.resolved || 0} label="Resolved" colorClass="text-success" bgClass="bg-success/10" />
+          <MetricCard icon={AlertCircle} value={stats.rejected || 0} label="Rejected" colorClass="text-destructive" bgClass="bg-destructive/10" />
         </div>
 
-        <SectionTitle left="Recent Complaints" right="View All" rightHref="/complaints" />
-        <div className="bg-card border border-border rounded-3xl shadow-sm overflow-hidden mb-8">
-          {complaints.length === 0 ? (
-            <div className="p-10 text-center flex flex-col items-center">
-               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                  <ClipboardList className="w-8 h-8 text-muted-foreground" />
-               </div>
-               <p className="text-base font-bold text-foreground">No complaints in your ward.</p>
-            </div>
-          ) : (
-            complaints.map((c: any, i: number) => (
-              <ComplaintItem key={c._id || c.id} complaint={c} index={i} total={complaints.length} />
-            ))
-          )}
-        </div>
+        <SectionTitle left="Complaints in Selected Ward" right="View All" rightHref="/complaints" />
+        
+        {isLoadingComplaints ? (
+          <div className="p-10 flex justify-center bg-card border border-border rounded-3xl shadow-sm">
+            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : (
+          <div className="bg-card border border-border rounded-3xl shadow-sm overflow-hidden mb-8">
+            {complaints.length === 0 ? (
+              <div className="p-10 text-center flex flex-col items-center">
+                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                    <ClipboardList className="w-8 h-8 text-muted-foreground" />
+                 </div>
+                 <p className="text-base font-bold text-foreground">No complaints in this ward.</p>
+              </div>
+            ) : (
+              complaints.map((c: any, i: number) => (
+                <ComplaintItem key={c._id || c.id} complaint={c} index={i} total={complaints.length} />
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -242,9 +242,11 @@ export const authService = {
   },
 
   // ─── INSPECTOR ───────────────────────────────────────────────────────────────
-  getWardComplaints: async ({ page = 1, limit = 20, status }: { page?: number; limit?: number; status?: string } = {}): Promise<any> => {
+  getWardComplaints: async ({ page = 1, limit = 20, status, district_id, ward_id }: { page?: number; limit?: number; status?: string; district_id?: string; ward_id?: string } = {}): Promise<any> => {
     const params: any = { page, limit };
     if (status) params.status = status;
+    if (district_id) params.district_id = district_id;
+    if (ward_id) params.ward_id = ward_id;
     const res = await api.get("/inspector/complaints", { params });
     return unwrapResponse(res);
   },
@@ -268,6 +270,20 @@ export const authService = {
       params: { page, is_active, limit },
     });
     return unwrapResponse(res);
+  },
+
+  /**
+   * Get ALL wards for the authenticated inspector's district.
+   * Calls GET /api/v1/wards — the backend uses the JWT token's district field.
+   * Returns { data: Ward[], total, page, limit, pages }
+   */
+  getAllWards: async ({ page = 1, limit = 100 }: { page?: number; limit?: number } = {}): Promise<any> => {
+    if (e2eMocksEnabled) return { data: e2eWards, total: e2eWards.length, page: 1, limit: 100 };
+    console.debug("[getAllWards] Calling GET /wards with page:", page, "limit:", limit);
+    const res = await api.get("/wards", { params: { page, limit } });
+    const result = unwrapResponse(res);
+    console.debug("[getAllWards] Raw response:", result);
+    return result;
   },
 
   // ─── WARD MANAGEMENT ─────────────────────────────────────────────────────────

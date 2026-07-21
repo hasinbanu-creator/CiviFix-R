@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext } from "../../context/AuthContext";
 import { Screen } from "../../components";
 import { COLORS, FONT_SIZES, SHADOWS, SPACING } from "../../constants/theme";
@@ -92,16 +93,18 @@ const Pill = ({ label, color, bg }) => (
   </View>
 );
 
-const SectionTitle = ({ left, right, onRight }) => (
+const SectionTitle = ({ left, right, onRight, rightComponent }) => (
   <View style={{
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     marginTop: SPACING.xl, marginBottom: SPACING.sm,
   }}>
     <Text style={{ color: COLORS.textDark, fontSize: FONT_SIZES.sm, fontWeight: "800" }}>{left}</Text>
-    {right && (
-      <TouchableOpacity onPress={onRight}>
-        <Text style={{ color: COLORS.primary, fontSize: FONT_SIZES.xs, fontWeight: "800" }}>{right}</Text>
-      </TouchableOpacity>
+    {rightComponent ? rightComponent : (
+      right && (
+        <TouchableOpacity onPress={onRight}>
+          <Text style={{ color: COLORS.primary, fontSize: FONT_SIZES.xs, fontWeight: "800" }}>{right}</Text>
+        </TouchableOpacity>
+      )
     )}
   </View>
 );
@@ -344,7 +347,10 @@ const SuperAdminDashboard = ({ navigation, meData, user }) => {
           ? <View style={{ padding: SPACING.xl }}><ActivityIndicator color={COLORS.primary} /></View>
           : complaints.map((c, i) => (
               <ComplaintItem key={c._id || i} complaint={c} index={i} total={complaints.length}
-                onPress={() => navigation.navigate("ComplaintDetail", { complaint: c })} />
+                onPress={() => {
+                  console.log("[DashboardScreen] Complaint pressed (SuperAdmin):", c._id || c.complaint_id);
+                  navigation.navigate("ComplaintDetail", { complaint: c, complaintId: c._id || c.complaint_id });
+                }} />
             ))
         }
       </ListCard>
@@ -454,6 +460,8 @@ const InspectorComplaintItem = ({ complaint, index, total, onPress }) => {
   const citizenName = complaint.user_id?.name || complaint.citizen_name || "Citizen";
   const createdDate = complaint.created_at ? new Date(complaint.created_at).toLocaleDateString() : "—";
   const wardName = complaint.ward_id?.ward_name || complaint.ward_name || "Assigned Ward";
+  const address = complaint.address || "No address provided";
+  const hasImages = complaint.images && complaint.images.length > 0;
 
   return (
     <TouchableOpacity
@@ -502,105 +510,323 @@ const InspectorComplaintItem = ({ complaint, index, total, onPress }) => {
           <Icon name="map-marker-outline" size={14} color={COLORS.textLight} />
           <Text style={{ color: COLORS.textLight, fontSize: FONT_SIZES.xs }}>{wardName}</Text>
         </View>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4, width: "100%", marginTop: 4 }}>
+          <Icon name="map-marker-radius-outline" size={14} color={COLORS.textLight} />
+          <Text numberOfLines={1} style={{ color: COLORS.textLight, fontSize: FONT_SIZES.xs, flex: 1 }}>{address}</Text>
+        </View>
+        {hasImages && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 }}>
+            <Icon name="image-outline" size={14} color={COLORS.primary} />
+            <Text style={{ color: COLORS.primary, fontSize: FONT_SIZES.xs }}>View Images</Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
 };
 
 const InspectorDashboard = ({ navigation, meData, user }) => {
-  const [dashboard, setDashboard] = useState(null);
-  const [complaints, setComplaints] = useState([]);
-  const [loading, setLoading]     = useState(true);
+  // ── State ────────────────────────────────────────────────────────────────
+  const [wards, setWards]               = useState([]);
+  const [selectedWardId, setSelectedWardId] = useState("");
+  const [complaints, setComplaints]     = useState([]);
+  const [stats, setStats]               = useState({ total: 0, pending: 0, in_progress: 0, resolved: 0, rejected: 0 });
+  const [loadingWards, setLoadingWards] = useState(true);
+  const [loadingComplaints, setLoadingComplaints] = useState(false);
+  const [wardError, setWardError]       = useState(null);
+  const [showPicker, setShowPicker]     = useState(false);
 
+  // ── Load all wards on mount ──────────────────────────────────────────────
   useEffect(() => {
-    load();
-    const unsubscribe = navigation.addListener("focus", load);
-    return unsubscribe;
-  }, [navigation]);
+    loadWards();
+  }, []);
 
-  const load = async () => {
-    setLoading(true);
+  const loadWards = async () => {
+    setLoadingWards(true);
+    setWardError(null);
     try {
-      const [dashRes, compRes] = await Promise.all([
-        authService.getInspectorDashboard?.(),
-        authService.getWardComplaints?.({ page: 1, limit: 100 })
-      ]);
-      setDashboard(dashRes?.data ?? dashRes ?? null);
-      
-      const compList = getItems(compRes) || [];
-      compList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      setComplaints(compList);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
+      console.log("[InspectorDashboard] Loading wards via GET /api/v1/wards...");
+
+      const res = await authService.getAllWards({ limit: 100 });
+
+      console.log("[InspectorDashboard] getAllWards raw result type:", typeof res, Array.isArray(res));
+      console.log("[InspectorDashboard] getAllWards result keys:", res ? Object.keys(res) : "null");
+
+      // Response after unwrapResponse: { data: [...wards], total, page, ... }
+      let wardsList = [];
+      if (Array.isArray(res)) {
+        wardsList = res;
+      } else if (Array.isArray(res?.data)) {
+        wardsList = res.data;
+      } else if (Array.isArray(res?.wards)) {
+        wardsList = res.wards;
+      }
+
+      console.log(`[InspectorDashboard] Parsed ${wardsList.length} wards`);
+
+      if (wardsList.length > 0) {
+        console.log("[InspectorDashboard] First ward:", wardsList[0]._id, wardsList[0].ward_name);
+        console.log("[InspectorDashboard] Last  ward:", wardsList[wardsList.length - 1]._id, wardsList[wardsList.length - 1].ward_name);
+      } else {
+        console.warn("[InspectorDashboard] No wards returned — dropdown will be empty");
+      }
+
+      setWards(wardsList);
+
+      if (wardsList.length > 0) {
+        const firstId = wardsList[0]._id || wardsList[0].id || "";
+        console.log("[InspectorDashboard] Auto-selecting first ward:", firstId);
+        setSelectedWardId(firstId);
+      }
+    } catch (err) {
+      console.error("[InspectorDashboard] loadWards error:", err?.message || err);
+      setWardError("Failed to load wards. Pull down to retry.");
+    } finally {
+      setLoadingWards(false);
+    }
   };
 
-  const stats = dashboard?.stats ?? {};
-  const wardInfo = dashboard?.ward_info;
-  
-  // Use backend stats or derive safely
-  const todaysCount = stats.todays_count ?? 0;
-  const resolvedToday = stats.resolved_today ?? 0;
-  const totalAssigned = stats.total_complaints ?? complaints.length;
-  const pending = stats.pending ?? complaints.filter(c => c.status === "OPEN").length;
-  const inProgress = stats.in_progress ?? complaints.filter(c => ["WORKING", "APPROVAL"].includes(c.status)).length;
-  const resolved = stats.resolved ?? complaints.filter(c => c.status === "CLOSED").length;
+  // ── Load complaints whenever selectedWardId changes ───────────────────────
+  useEffect(() => {
+    if (!selectedWardId) {
+      console.log("[InspectorDashboard] No ward selected yet — skipping complaints load");
+      return;
+    }
+    loadComplaints(selectedWardId);
+    AsyncStorage.setItem("inspectorSelectedWardId", selectedWardId).catch(console.error);
+  }, [selectedWardId]);
 
-  const profileStats = [
-    { value: todaysCount, label: "Today's Count" },
-    { value: resolvedToday, label: "Resolved Today" },
-    { value: totalAssigned, label: "Total Assigned" },
-  ];
+  const loadComplaints = async (wardId) => {
+    setLoadingComplaints(true);
+    try {
+      console.log(`[InspectorDashboard] Loading complaints for ward_id=${wardId}`);
+      console.log(`[InspectorDashboard] API call: GET /inspector/complaints?ward_id=${wardId}&limit=100`);
 
+      const res = await authService.getWardComplaints({ ward_id: wardId, limit: 100 });
+
+      console.log("[InspectorDashboard] getWardComplaints raw result:", typeof res, res ? Object.keys(res) : "null");
+
+      // Backend returns: { complaints: [...], stats: {...}, page, total, ... }
+      const complaintsList = res?.complaints || res?.data || (Array.isArray(res) ? res : []);
+
+      console.log(`[InspectorDashboard] Parsed ${complaintsList.length} complaints`);
+
+      complaintsList.forEach((c, i) => {
+        if (i < 3) console.log(`  [complaint ${i}] id=${c.complaint_id} type=${c.complaint_type} status=${c.status}`);
+      });
+
+      setComplaints(complaintsList);
+
+      // Parse stats from response
+      if (res?.stats) {
+        console.log("[InspectorDashboard] Stats from backend:", res.stats);
+        setStats(res.stats);
+      } else {
+        // Compute locally
+        const total      = complaintsList.length;
+        const pending    = complaintsList.filter(c => ["OPEN", "PENDING"].includes(c.status)).length;
+        const in_progress = complaintsList.filter(c => ["IN_PROGRESS", "WORKING", "ACCEPTED", "FIELD_VISIT", "APPROVAL"].includes(c.status)).length;
+        const resolved   = complaintsList.filter(c => ["RESOLVED", "CLOSED"].includes(c.status)).length;
+        const rejected   = complaintsList.filter(c => c.status === "REJECTED").length;
+        setStats({ total, pending, in_progress, resolved, rejected });
+      }
+    } catch (err) {
+      console.error("[InspectorDashboard] loadComplaints error:", err?.message || err);
+      setComplaints([]);
+    } finally {
+      setLoadingComplaints(false);
+    }
+  };
+
+  // ── Derive selected ward label ───────────────────────────────────────────
+  const selectedWard = wards.find(w => (w._id || w.id) === selectedWardId);
+  const selectedWardLabel = selectedWard
+    ? `Ward #${selectedWard.ward_number} – ${selectedWard.ward_name}`
+    : "Select a Ward";
+
+  // ── Stat metrics ─────────────────────────────────────────────────────────
   const metrics = [
-    { icon: "alert-circle-outline", value: pending,       label: "Pending",     color: "#D97706",      bg: "#FEF3C7" },
-    { icon: "progress-wrench",      value: inProgress,    label: "In Progress", color: COLORS.primary, bg: "#DBEAFE" },
-    { icon: "check-circle-outline", value: resolved,      label: "Resolved",    color: "#059669",      bg: "#D1FAE5" },
-    { icon: "map-marker-radius",    value: wardInfo?.ward_number ? `#${wardInfo.ward_number}` : "—", label: "My Ward", color: "#0891B2", bg: "#CFFAFE" },
+    { icon: "clipboard-list",        value: stats.total ?? 0,       label: "Total",       color: "#374151", bg: "#F3F4F6" },
+    { icon: "alert-circle-outline",  value: stats.pending ?? 0,     label: "Pending",     color: "#D97706", bg: "#FEF3C7" },
+    { icon: "progress-wrench",       value: stats.in_progress ?? 0, label: "In Progress", color: COLORS.primary, bg: "#DBEAFE" },
+    { icon: "check-circle-outline",  value: stats.resolved ?? 0,    label: "Resolved",    color: "#059669", bg: "#D1FAE5" },
+    { icon: "close-circle-outline",  value: stats.rejected ?? 0,    label: "Rejected",    color: "#DC2626", bg: "#FFE4E6" },
   ];
 
-  const quickActions = [
-    { icon: "clipboard-list-outline", title: "View\nComplaints", color: COLORS.primary, onPress: () => navigation.getParent()?.navigate("Complaints") },
-    { icon: "map-marker-outline",     title: "View My\nWards",   color: "#0891B2",      onPress: () => navigation.navigate("Wards", { screen: "WardList" }) },
-    { icon: "update",                 title: "Update\nStatus",   color: "#D97706",      onPress: () => navigation.getParent()?.navigate("Complaints") },
-  ];
+  // ── Loading state (wards) ─────────────────────────────────────────────────
+  if (loadingWards) {
+    return (
+      <View style={{ alignItems: "center", paddingVertical: SPACING.xxl }}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={{ color: COLORS.textLight, fontSize: FONT_SIZES.sm, marginTop: SPACING.md }}>
+          Loading wards…
+        </Text>
+      </View>
+    );
+  }
+
+  // ── Error state ───────────────────────────────────────────────────────────
+  if (wardError) {
+    return (
+      <View style={{ alignItems: "center", paddingVertical: SPACING.xxl }}>
+        <Icon name="alert-circle-outline" size={48} color="#DC2626" />
+        <Text style={{ color: COLORS.textDark, fontSize: FONT_SIZES.md, fontWeight: "700", marginTop: SPACING.md }}>
+          Ward Load Error
+        </Text>
+        <Text style={{ color: COLORS.textLight, fontSize: FONT_SIZES.sm, textAlign: "center", marginTop: 4 }}>
+          {wardError}
+        </Text>
+        <TouchableOpacity
+          onPress={loadWards}
+          style={{ marginTop: SPACING.lg, backgroundColor: COLORS.primary, borderRadius: 10, paddingHorizontal: 24, paddingVertical: 10 }}
+        >
+          <Text style={{ color: "#FFFFFF", fontWeight: "800", fontSize: FONT_SIZES.sm }}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // ── Empty wards state ─────────────────────────────────────────────────────
+  if (wards.length === 0) {
+    return (
+      <View style={{ alignItems: "center", paddingVertical: SPACING.xxl }}>
+        <Icon name="map-marker-off-outline" size={48} color={COLORS.border} />
+        <Text style={{ color: COLORS.textDark, fontSize: FONT_SIZES.md, fontWeight: "700", marginTop: SPACING.md }}>
+          No Wards Available
+        </Text>
+        <Text style={{ color: COLORS.textLight, fontSize: FONT_SIZES.sm, textAlign: "center", marginTop: 4 }}>
+          No wards found for your district.
+        </Text>
+      </View>
+    );
+  }
+
+  console.log(`[InspectorDashboard] Rendering ${complaints.length} complaints for selectedWardId: ${selectedWardId}`);
 
   return (
     <>
-      <UserProfileCard meData={meData} user={user} stats={profileStats} />
-      
-      {wardInfo && (
-        <View style={{ backgroundColor: COLORS.card, borderRadius: 12, padding: SPACING.lg, ...SHADOWS.md, marginVertical: SPACING.lg }}>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <View>
-              <Text style={{ fontSize: FONT_SIZES.sm, color: COLORS.textLight, fontWeight: "600", textTransform: "uppercase" }}>Assigned Ward</Text>
-              <Text style={{ fontSize: FONT_SIZES.lg, fontWeight: "800", color: COLORS.textDark, marginTop: 4 }}>
-                {wardInfo.ward_name} (Ward #{wardInfo.ward_number})
-              </Text>
-            </View>
-            <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: `${COLORS.primary}15`, alignItems: "center", justifyContent: "center" }}>
-               <Icon name="shield-check" size={24} color={COLORS.primary} />
-            </View>
+      {/* ── User Profile Card ─────────────────────────────────────────── */}
+      <UserProfileCard meData={meData} user={user} stats={[
+        { value: stats.total,       label: "Total"    },
+        { value: stats.pending,     label: "Pending"  },
+        { value: stats.resolved,    label: "Resolved" },
+      ]} />
+
+      {/* ── Ward Selector ─────────────────────────────────────────────── */}
+      <View style={{ marginTop: SPACING.lg, marginBottom: SPACING.md }}>
+        <Text style={{ color: COLORS.textLight, fontSize: FONT_SIZES.xs, fontWeight: "700", textTransform: "uppercase", marginBottom: 6 }}>
+          Select Ward ({wards.length} available)
+        </Text>
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => setShowPicker(!showPicker)}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            backgroundColor: COLORS.card,
+            borderRadius: 12,
+            paddingHorizontal: SPACING.md,
+            paddingVertical: SPACING.md,
+            borderWidth: 1,
+            borderColor: COLORS.border,
+            ...SHADOWS.sm
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Icon name="map-marker-radius" size={20} color={COLORS.primary} />
+            <Text style={{ marginLeft: SPACING.sm, color: COLORS.textDark, fontSize: FONT_SIZES.md, fontWeight: "600" }}>
+              {selectedWardLabel}
+            </Text>
           </View>
-        </View>
-      )}
+          <Icon name={showPicker ? "chevron-up" : "chevron-down"} size={20} color={COLORS.textLight} />
+        </TouchableOpacity>
 
-      <SectionTitle left="Quick Actions" />
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        {quickActions.map((a, i) => <QuickActionBtn key={i} {...a} />)}
+        {showPicker && (
+          <View style={{ marginTop: 8, maxHeight: 220, borderWidth: 1, borderColor: COLORS.border, borderRadius: 12, overflow: "hidden", backgroundColor: COLORS.card, ...SHADOWS.md }}>
+            <ScrollView nestedScrollEnabled showsVerticalScrollIndicator>
+              {wards.map((ward) => {
+                const wardId = ward._id || ward.id;
+                const isSelected = wardId === selectedWardId;
+                return (
+                  <TouchableOpacity
+                    key={wardId}
+                    onPress={() => {
+                      setSelectedWardId(wardId);
+                      setShowPicker(false);
+                    }}
+                    style={{
+                      paddingVertical: 12,
+                      paddingHorizontal: SPACING.md,
+                      borderBottomWidth: 1,
+                      borderBottomColor: COLORS.border,
+                      backgroundColor: isSelected ? `${COLORS.primary}15` : COLORS.card,
+                    }}
+                  >
+                    <Text style={{
+                      color: isSelected ? COLORS.primary : COLORS.textDark,
+                      fontSize: FONT_SIZES.sm,
+                      fontWeight: isSelected ? "800" : "500",
+                    }}>
+                      Ward #{ward.ward_number} – {ward.ward_name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
       </View>
 
-      <SectionTitle left="Complaint Statistics" />
-      <View style={{ flexDirection: "row", gap: SPACING.sm, flexWrap: "wrap" }}>
-        {metrics.map((m, i) => <View key={i} style={{ width: "47.5%" }}><MetricCard {...m} /></View>)}
+      {/* ── Stats Row ─────────────────────────────────────────────────── */}
+      <SectionTitle left="Complaint Overview" />
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: SPACING.sm }}>
+        {metrics.map((m, i) => (
+          <View key={i} style={{ width: "47.5%" }}>
+            <MetricCard {...m} />
+          </View>
+        ))}
       </View>
 
-      <SectionTitle left="Recent Complaints" right="View All" onRight={() => navigation.getParent()?.navigate("Complaints")} />
-      <ListCard empty={!loading && complaints.length === 0} emptyLabel="No complaints available for your assigned wards.">
-        {loading
-          ? <View style={{ padding: SPACING.lg }}><ActivityIndicator color={COLORS.primary} /></View>
+      {/* ── Complaints List ───────────────────────────────────────────── */}
+      <SectionTitle
+        left={`Complaints in Ward${selectedWard ? ` #${selectedWard.ward_number}` : ""}`}
+        rightComponent={
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            <TouchableOpacity onPress={() => selectedWardId && loadComplaints(selectedWardId)}>
+              <Icon name="refresh" size={20} color={COLORS.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => {/* Search */}}>
+              <Icon name="magnify" size={20} color={COLORS.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => {/* Filter */}}>
+              <Icon name="filter-variant" size={20} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+        }
+      />
+
+      <ListCard
+        empty={!loadingComplaints && complaints.length === 0}
+        emptyLabel={selectedWardId
+          ? "No complaints available for this ward."
+          : "Select a ward to view complaints."
+        }
+      >
+        {loadingComplaints
+          ? <View style={{ padding: SPACING.xl }}><ActivityIndicator color={COLORS.primary} /></View>
           : complaints.map((c, i, arr) => (
-              <InspectorComplaintItem key={c._id || i} complaint={c} index={i} total={arr.length}
-                onPress={() => navigation.navigate("ComplaintDetail", { complaint: c })} />
+              <InspectorComplaintItem
+                key={c._id || c.complaint_id || i}
+                complaint={c}
+                index={i}
+                total={arr.length}
+                onPress={() => {
+                  console.log("[DashboardScreen] Complaint pressed (Inspector):", c._id || c.complaint_id);
+                  navigation.navigate("ComplaintDetail", { complaint: c, complaintId: c._id || c.complaint_id });
+                }}
+              />
             ))
         }
       </ListCard>
@@ -673,7 +899,10 @@ const WorkerDashboard = ({ navigation, meData, user }) => {
           ? <View style={{ padding: SPACING.lg }}><ActivityIndicator color={COLORS.primary} /></View>
           : assignments.map((c, i) => (
               <ComplaintItem key={c._id || i} complaint={c} index={i} total={assignments.length}
-                onPress={() => navigation.navigate("ComplaintDetail", { complaint: c })} />
+                onPress={() => {
+                  console.log("[DashboardScreen] Complaint pressed (Worker):", c._id || c.complaint_id);
+                  navigation.navigate("ComplaintDetail", { complaint: c, complaintId: c._id || c.complaint_id });
+                }} />
             ))
         }
       </ListCard>
@@ -741,7 +970,7 @@ const CitizenDashboard = ({ navigation, meData, user }) => {
 // ─── MAIN SCREEN ─────────────────────────────────────────────────────────────
 
 export const DashboardScreen = ({ navigation }) => {
-  const { user }                    = useContext(AuthContext);
+  const { user, signOut }           = useContext(AuthContext);
   const [meData, setMeData]         = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -848,17 +1077,41 @@ export const DashboardScreen = ({ navigation }) => {
               </View>
             </View>
 
-            {/* Bell */}
-            <TouchableOpacity
-              onPress={() => navigation.getParent()?.navigate("Profile")}
-              style={{
-                width: 38, height: 38, borderRadius: 19,
-                backgroundColor: "rgba(255,255,255,0.15)",
-                alignItems: "center", justifyContent: "center",
-              }}
-            >
-              <Icon name="bell-outline" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
+            {/* Action Buttons */}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+              <TouchableOpacity
+                onPress={() => navigation.getParent()?.navigate("Profile", { screen: "MyNotifications" })}
+                style={{
+                  width: 38, height: 38, borderRadius: 19,
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  alignItems: "center", justifyContent: "center",
+                }}
+              >
+                <Icon name="bell-outline" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => navigation.getParent()?.navigate("Profile")}
+                style={{
+                  width: 38, height: 38, borderRadius: 19,
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  alignItems: "center", justifyContent: "center",
+                }}
+              >
+                <Icon name="account-outline" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => signOut()}
+                style={{
+                  width: 38, height: 38, borderRadius: 19,
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  alignItems: "center", justifyContent: "center",
+                }}
+              >
+                <Icon name="logout" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
           </View>
         </LinearGradient>
 

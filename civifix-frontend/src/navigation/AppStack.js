@@ -140,8 +140,8 @@ export const AppStack = () => {
         }}
       />
 
-      {/* Wards tab for DISTRICT_ADMIN and INSPECTOR */}
-      {(user?.role === "DISTRICT_ADMIN" || user?.role === "INSPECTOR") && (
+      {/* Wards tab for DISTRICT_ADMIN */}
+      {user?.role === "DISTRICT_ADMIN" && (
         <Tab.Screen
           name="Wards"
           component={WardStack}
