@@ -80,7 +80,7 @@ export const Button = ({
         {
           width: fullWidth ? "100%" : "auto",
           opacity: disabled ? 0.5 : 1,
-          borderRadius: 8,
+          borderRadius: 16,
           ...(variant === "primary" ? SHADOWS.md : {}),
         },
         style,
@@ -91,7 +91,7 @@ export const Button = ({
           backgroundColor: variantStyle?.gradient ? "transparent" : variantStyle?.bg,
           borderColor: variantStyle?.borderColor,
           borderWidth: variantStyle?.borderWidth || 0,
-          borderRadius: 8,
+          borderRadius: 16,
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "row",
