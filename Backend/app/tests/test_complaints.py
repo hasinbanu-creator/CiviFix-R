@@ -300,6 +300,29 @@ class TestComplaintService:
             await service.create_complaint(schema, "user_123", "INSPECTOR")
 
     @pytest.mark.asyncio
+    async def test_get_complaint_by_complaint_id_string(self):
+        """Complaint details should resolve when the client passes the complaint_id string."""
+        mock_complaint_repo = AsyncMock()
+        mock_ward_repo = AsyncMock()
+
+        mock_complaint_repo.get_by_id.return_value = None
+        mock_complaint_repo.get_by_complaint_id.return_value = {
+            "_id": ObjectId(),
+            "complaint_id": "CIVI-123",
+            "status": "OPEN",
+            "created_at": datetime.utcnow(),
+        }
+        mock_complaint_repo.get_history.return_value = []
+
+        service = ComplaintService(mock_complaint_repo, mock_ward_repo)
+
+        result = await service.get_complaint("CIVI-123")
+
+        assert result is not None
+        assert result["complaint_id"] == "CIVI-123"
+        assert result["status"] == "OPEN"
+
+    @pytest.mark.asyncio
     async def test_create_complaint_invalid_gps(self):
         """Test complaint creation with invalid GPS coordinates"""
         mock_complaint_repo = AsyncMock()

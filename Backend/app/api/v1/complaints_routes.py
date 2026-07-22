@@ -1,13 +1,16 @@
-"""Complaint management routes"""
-from fastapi import APIRouter, Depends, status, HTTPException, Query
+from fastapi import APIRouter, Depends, status, HTTPException, Query, Form, UploadFile, File
 from bson import ObjectId
 import logging
-from typing import Optional
+from typing import Optional, List
+import os
+import uuid
+import aiofiles
+from datetime import datetime
 
 from app.core.response import SuccessResponse
 from app.dependencies.auth_dependency import get_current_user
 from app.core.exceptions import CivifixException
-from app.core.enums import Roles
+from app.core.enums import Roles, ComplaintType, Priority
 from app.schemas.complaint_schema import (
     ComplaintCreateSchema, ComplaintAssignWorkerSchema,
     ComplaintSubmitResolutionSchema, ComplaintApproveSchema,
@@ -44,14 +47,53 @@ def get_complaint_service(db=Depends(get_database)):
     tags=["Complaints"]
 )
 async def create_complaint(
-    complaint_data: ComplaintCreateSchema,
+    ward_id: str = Form(...),
+    complaint_type: str = Form(...),
+    description: str = Form(...),
+    latitude: float = Form(...),
+    longitude: float = Form(...),
+    address: Optional[str] = Form(None),
+    citizen_note: Optional[str] = Form(None),
+    priority: Optional[str] = Form(Priority.MEDIUM),
+    images: List[UploadFile] = File(default=[]),
     current_user: dict = Depends(get_current_user),
     service: ComplaintService = Depends(get_complaint_service)
 ):
     """Create a new complaint (CITIZEN only)"""
     try:
+        logger.info("Complaint endpoint reached")
+        
         user_id = current_user["user_id"]
         logger.info(f"Complaint creation requested by user: {user_id}")
+        
+        image_urls = []
+        if images:
+            upload_dir = os.path.join("uploads", user_id, "images")
+            os.makedirs(upload_dir, exist_ok=True)
+            for file in images:
+                if not file.filename:
+                    continue
+                file_uuid = uuid.uuid4().hex[:8]
+                new_filename = f"complaint_{file_uuid}.jpg"
+                file_path = os.path.join(upload_dir, new_filename)
+                
+                content = await file.read()
+                async with aiofiles.open(file_path, 'wb') as out_file:
+                    await out_file.write(content)
+                # Store exactly as requested: <user_id>/images/complaint_<uuid>.jpg
+                image_urls.append(f"{user_id}/images/{new_filename}")
+
+        complaint_data = ComplaintCreateSchema(
+            ward_id=ward_id,
+            complaint_type=ComplaintType(complaint_type),
+            description=description,
+            latitude=latitude,
+            longitude=longitude,
+            address=address,
+            citizen_note=citizen_note,
+            priority=Priority(priority) if priority else Priority.MEDIUM,
+            image_urls=image_urls
+        )
         logger.info(f"Complaint payload: {complaint_data.dict()}")
         
         result = await service.create_complaint(
@@ -69,8 +111,10 @@ async def create_complaint(
         logger.error(f"Complaint creation error: {str(e)}")
         raise HTTPException(status_code=e.status_code, detail=str(e))
     except Exception as e:
+        import traceback
         logger.error(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logger.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post(

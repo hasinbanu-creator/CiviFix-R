@@ -4,6 +4,17 @@ import * as Device from "expo-device";
 
 const DEFAULT_API_URL = "http://localhost:8000/api/v1"
 
+const isLocalhostLike = (url) => {
+  if (!url) return true;
+
+  try {
+    const { hostname } = new URL(url);
+    return ["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(hostname);
+  } catch {
+    return false;
+  }
+};
+
 const getMetroHost = () => {
   const hostUri =
     Constants.expoConfig?.hostUri ||
@@ -13,10 +24,18 @@ const getMetroHost = () => {
   return hostUri?.split(":")?.[0];
 };
 
+const getLanIp = () => {
+  const host = getMetroHost();
+  if (!host) return null;
+  if (host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0") {
+    return null;
+  }
+  return host;
+};
+
 const resolveApiUrl = () => {
   const configuredUrl = process.env.EXPO_PUBLIC_API_URL || DEFAULT_API_URL;
-  const isLocalhost =
-    configuredUrl.includes("localhost") || configuredUrl.includes("127.0.0.1");
+  const isLocalhost = isLocalhostLike(configuredUrl);
 
   if (!isLocalhost || Platform.OS === "web") {
     return configuredUrl;
@@ -28,9 +47,9 @@ const resolveApiUrl = () => {
   }
 
   // If we are on a physical device, we should try to use the metro host (LAN IP)
-  const metroHost = getMetroHost();
-  if (metroHost) {
-    return configuredUrl.replace(/localhost|127\.0\.0\.1/, metroHost);
+  const lanHost = getLanIp();
+  if (lanHost) {
+    return configuredUrl.replace(/localhost|127\.0\.0\.1|0\.0\.0\.0/, lanHost);
   }
 
   return configuredUrl;

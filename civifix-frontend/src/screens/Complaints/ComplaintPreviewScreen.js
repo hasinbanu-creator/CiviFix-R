@@ -3,8 +3,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIn
 import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
 import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SHADOWS } from "../../constants/theme";
 import MapView, { Marker } from "react-native-maps";
+import { API_URL } from "../../constants/endpoints";
 import authService from "../../services/authService";
 import { getErrorMessage } from "../../services/api";
+import { resolveImageUri } from "../../utils/imageUri";
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -25,6 +27,7 @@ const ComplaintPreviewScreen = ({ route, navigation }) => {
         longitude: parseFloat(form.longitude),
         address: form.address,
         citizen_note: form.citizen_note ? form.citizen_note.trim() : undefined,
+        image_urls: Array.isArray(form.image_urls) ? form.image_urls : [],
       };
 
       const created = await authService.createComplaint(payload);
@@ -103,6 +106,22 @@ const ComplaintPreviewScreen = ({ route, navigation }) => {
               <Text style={styles.sectionTitle}>Additional Note</Text>
             </View>
             <Text style={styles.description}>{form.citizen_note}</Text>
+          </View>
+        ) : null}
+
+        {/* Uploaded Photos */}
+        {Array.isArray(form.image_urls) && form.image_urls.length > 0 ? (
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <Icon name="image-multiple-outline" size={20} color={COLORS.primary} />
+              <Text style={styles.sectionTitle}>Attached Photos</Text>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
+              {form.image_urls.map((img, idx) => {
+                const resolvedUri = resolveImageUri(img, API_URL);
+                return <Image key={`${img}-${idx}`} source={{ uri: resolvedUri }} style={styles.previewImage} />;
+              })}
+            </ScrollView>
           </View>
         ) : null}
 

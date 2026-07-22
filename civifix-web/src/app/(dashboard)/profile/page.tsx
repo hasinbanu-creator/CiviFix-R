@@ -190,13 +190,15 @@ export default function ProfilePage() {
           subtitle="Edit name, phone, address" 
           colorClass="text-primary" 
           bgClass="bg-primary/10" 
+          onClick={() => router.push("/settings")}
         />
         <MenuItem 
           icon={Bell} 
           title="Notifications" 
           subtitle="Manage your alerts" 
           colorClass="text-accent" 
-          bgClass="bg-accent/10" 
+          bgClass="bg-accent/10"
+          onClick={() => router.push("/notifications")}
         />
         <MenuItem 
           icon={Settings} 
@@ -204,31 +206,10 @@ export default function ProfilePage() {
           subtitle="App preferences" 
           colorClass="text-secondary" 
           bgClass="bg-secondary/10" 
+          onClick={() => router.push("/settings")}
         />
 
-        {/* Support Section */}
-        <SectionLabel>Support</SectionLabel>
-        <MenuItem 
-          icon={HelpCircle} 
-          title="Help & FAQs" 
-          subtitle="Find answers quickly" 
-          colorClass="text-success" 
-          bgClass="bg-success/10" 
-        />
-        <MenuItem 
-          icon={Info} 
-          title="Contact Support" 
-          subtitle="Get in touch with us" 
-          colorClass="text-primary" 
-          bgClass="bg-primary/10" 
-        />
-        <MenuItem 
-          icon={Info} 
-          title="About CiviFix" 
-          subtitle="Version 1.0.0" 
-          colorClass="text-primary" 
-          bgClass="bg-primary/10" 
-        />
+        {/* Support Section Removed (Placeholder items removed to adhere to no dead UI) */}
 
         {/* Session Section */}
         <SectionLabel>Session</SectionLabel>

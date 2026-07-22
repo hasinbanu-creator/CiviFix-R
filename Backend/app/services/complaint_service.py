@@ -27,6 +27,20 @@ logger = logging.getLogger(__name__)
 class ComplaintService:
     """Service for complaint operations"""
 
+    @staticmethod
+    def _normalize_id(value):
+        """Convert valid Mongo IDs while preserving non-Mongo identifier strings."""
+        if value is None:
+            return None
+        if isinstance(value, ObjectId):
+            return value
+        if isinstance(value, str):
+            try:
+                return ObjectId(value)
+            except Exception:
+                return value
+        return value
+
     def __init__(
         self,
         complaint_repo: ComplaintRepository,
@@ -99,19 +113,19 @@ class ComplaintService:
 
             complaint_doc = complaint_document(complaint_data)
             complaint_doc["_id"] = ObjectId()
-            complaint_doc["user_id"] = ObjectId(user_id)
-            complaint_doc["district_id"] = ObjectId(district_id)
-            complaint_doc["ward_id"] = ObjectId(complaint_data.ward_id)
-            complaint_doc["inspector_id"] = ObjectId(inspector_id) if inspector_id else None
+            complaint_doc["user_id"] = self._normalize_id(user_id)
+            complaint_doc["district_id"] = self._normalize_id(district_id)
+            complaint_doc["ward_id"] = self._normalize_id(complaint_data.ward_id)
+            complaint_doc["inspector_id"] = self._normalize_id(inspector_id) if inspector_id else None
             complaint_doc["complaint_id"] = self._generate_complaint_id()
             complaint_doc["status"] = ComplaintStatus.OPEN
 
             complaint_id = await self.complaint_repo.create(complaint_doc)
 
             history_data = {
-                "complaint_id": ObjectId(complaint_id),
+                "complaint_id": complaint_doc["_id"],
                 "action": "CREATED",
-                "performed_by": ObjectId(user_id),
+                "performed_by": self._normalize_id(user_id),
                 "role": user_role,
                 "timestamp": datetime.utcnow()
             }
@@ -144,10 +158,13 @@ class ComplaintService:
         """Get complaint details with history"""
         try:
             complaint = await self.complaint_repo.get_by_id(complaint_id)
+            if not complaint and hasattr(self.complaint_repo, "get_by_complaint_id"):
+                complaint = await self.complaint_repo.get_by_complaint_id(complaint_id)
             if not complaint:
                 raise ResourceNotFoundError("Complaint not found")
             
-            history = await self.complaint_repo.get_history(complaint_id)
+            history_lookup = complaint.get("_id") or complaint_id
+            history = await self.complaint_repo.get_history(history_lookup)
             
             response = self._format_complaint(complaint)
             response["history"] = [self._format_history(h) for h in history]
@@ -190,7 +207,7 @@ class ComplaintService:
                     raise ValidationError("Worker must be in the same district")
 
             update_data = {
-                "worker_id": ObjectId(assignment_data.worker_id),
+                "worker_id": self._normalize_id(assignment_data.worker_id),
                 "deadline": assignment_data.deadline,
                 "status": ComplaintStatus.WORKING
             }
@@ -200,11 +217,11 @@ class ComplaintService:
                 raise CivifixException("Failed to assign worker")
 
             history_data = {
-                "complaint_id": ObjectId(complaint_id),
+                "complaint_id": self._normalize_id(complaint_id),
                 "action": "ASSIGNED",
                 "old_status": complaint.get("status"),
                 "new_status": ComplaintStatus.WORKING,
-                "performed_by": ObjectId(inspector_id),
+                "performed_by": self._normalize_id(inspector_id),
                 "role": user_role,
                 "remarks": assignment_data.note,
                 "timestamp": datetime.utcnow()
@@ -263,11 +280,11 @@ class ComplaintService:
                 raise CivifixException("Failed to submit work")
 
             history_data = {
-                "complaint_id": ObjectId(complaint_id),
+                "complaint_id": self._normalize_id(complaint_id),
                 "action": "STATUS_CHANGED",
                 "old_status": ComplaintStatus.WORKING,
                 "new_status": ComplaintStatus.APPROVAL,
-                "performed_by": ObjectId(worker_id),
+                "performed_by": self._normalize_id(worker_id),
                 "role": user_role,
                 "remarks": "Work completed and submitted for approval",
                 "timestamp": datetime.utcnow()
@@ -325,11 +342,11 @@ class ComplaintService:
                 raise CivifixException("Failed to approve complaint")
 
             history_data = {
-                "complaint_id": ObjectId(complaint_id),
+                "complaint_id": self._normalize_id(complaint_id),
                 "action": "APPROVED",
                 "old_status": ComplaintStatus.APPROVAL,
                 "new_status": ComplaintStatus.CLOSED,
-                "performed_by": ObjectId(inspector_id),
+                "performed_by": self._normalize_id(inspector_id),
                 "role": user_role,
                 "remarks": approve_data.note,
                 "timestamp": datetime.utcnow()
@@ -392,11 +409,11 @@ class ComplaintService:
                 raise CivifixException("Failed to reject complaint")
 
             history_data = {
-                "complaint_id": ObjectId(complaint_id),
+                "complaint_id": self._normalize_id(complaint_id),
                 "action": "REJECTED",
                 "old_status": ComplaintStatus.APPROVAL,
                 "new_status": ComplaintStatus.WORKING,
-                "performed_by": ObjectId(inspector_id),
+                "performed_by": self._normalize_id(inspector_id),
                 "role": user_role,
                 "remarks": reject_data.reason,
                 "timestamp": datetime.utcnow()
@@ -432,7 +449,7 @@ class ComplaintService:
         try:
             skip = (page - 1) * limit
             
-            query = {"user_id": ObjectId(user_id)}
+            query = {"user_id": self._normalize_id(user_id)}
             if status:
                 query["status"] = status
             

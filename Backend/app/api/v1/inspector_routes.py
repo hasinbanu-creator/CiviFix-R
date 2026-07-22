@@ -14,6 +14,41 @@ from app.db.mongodb import db
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+
+def _normalize_id(value):
+    """Convert a value to ObjectId when possible; otherwise keep it as-is."""
+    if value is None:
+        return None
+    if isinstance(value, ObjectId):
+        return value
+    try:
+        return ObjectId(value)
+    except Exception:
+        return value
+
+
+async def _get_inspector_ward_ids(current_user: Dict[str, Any]):
+    """Return all active wards assigned to the inspector."""
+    inspector_id = _normalize_id(current_user.get("user_id"))
+    if not inspector_id:
+        return []
+
+    wards = await db.wards.find({
+        "inspector_id": inspector_id,
+        "is_active": True
+    }).to_list(length=1000)
+    return [ward.get("_id") for ward in wards if ward.get("_id")]
+
+
+async def _find_complaint_by_identifier(complaint_id: str):
+    """Find a complaint using either the internal Mongo ID or the public complaint_id string."""
+    normalized_id = _normalize_id(complaint_id)
+    query = {"$or": [{"_id": normalized_id}, {"complaint_id": complaint_id}]}
+    if not isinstance(normalized_id, ObjectId):
+        query = {"complaint_id": complaint_id}
+    return await db.complaints.find_one(query)
+
+
 @router.get(
     "/dashboard",
     summary="Get inspector dashboard stats",
@@ -123,16 +158,13 @@ async def get_ward_complaints(
             except Exception:
                 logger.warning(f"[complaints] Invalid ward_id '{ward_id}' — cannot convert to ObjectId")
 
-        # Only fallback to inspector's assigned ward if NOTHING was specified
+        # Only fallback to the inspector's assigned wards if NOTHING was specified
         if not district_id and not ward_id:
-            logger.info("[complaints] No district_id or ward_id provided; falling back to inspector's assigned ward")
-            ward = await db.wards.find_one({
-                "inspector_id": ObjectId(current_user["user_id"]),
-                "is_active": True
-            })
-            if ward:
-                query["ward_id"] = ward["_id"]
-                logger.info(f"[complaints] Fallback ward_id: {ward['_id']}")
+            logger.info("[complaints] No district_id or ward_id provided; falling back to inspector's assigned wards")
+            ward_ids = await _get_inspector_ward_ids(current_user)
+            if ward_ids:
+                query["ward_id"] = {"$in": ward_ids}
+                logger.info(f"[complaints] Fallback ward_ids: {ward_ids}")
             else:
                 logger.warning("[complaints] Inspector not assigned to any ward and no ward_id provided")
                 return ResponseHandler.success(
@@ -316,7 +348,7 @@ async def start_work(
 ):
     """Move complaint from OPEN to IN_PROGRESS and auto-assign a random worker"""
     try:
-        complaint = await db.complaints.find_one({"_id": ObjectId(complaint_id)})
+        complaint = await _find_complaint_by_identifier(complaint_id)
         if not complaint:
             return ResponseHandler.error(
                 message="Complaint not found",
@@ -354,12 +386,12 @@ async def start_work(
             update_fields["worker_id"] = assigned_worker_id
 
         await db.complaints.update_one(
-            {"_id": ObjectId(complaint_id)},
+            {"_id": complaint.get("_id")},
             {"$set": update_fields}
         )
 
         await db.complaint_history.insert_one({
-            "complaint_id": ObjectId(complaint_id),
+            "complaint_id": complaint.get("_id"),
             "action": "STATUS_CHANGED",
             "old_status": "OPEN",
             "new_status": "IN_PROGRESS",
@@ -393,7 +425,7 @@ async def reject_complaint_simplified(
 ):
     """Move complaint from OPEN to REJECTED"""
     try:
-        complaint = await db.complaints.find_one({"_id": ObjectId(complaint_id)})
+        complaint = await _find_complaint_by_identifier(complaint_id)
         if not complaint:
             return ResponseHandler.error(
                 message="Complaint not found",
@@ -407,12 +439,12 @@ async def reject_complaint_simplified(
             )
 
         await db.complaints.update_one(
-            {"_id": ObjectId(complaint_id)},
+            {"_id": complaint.get("_id")},
             {"$set": {"status": "REJECTED", "updated_at": datetime.utcnow()}}
         )
 
         await db.complaint_history.insert_one({
-            "complaint_id": ObjectId(complaint_id),
+            "complaint_id": complaint.get("_id"),
             "action": "REJECTED",
             "old_status": "OPEN",
             "new_status": "REJECTED",
@@ -454,7 +486,7 @@ async def resolve_complaint(
 ):
     """Move complaint to RESOLVED with proof images"""
     try:
-        complaint = await db.complaints.find_one({"_id": ObjectId(complaint_id)})
+        complaint = await _find_complaint_by_identifier(complaint_id)
         if not complaint:
             return ResponseHandler.error(
                 message="Complaint not found",
@@ -468,7 +500,7 @@ async def resolve_complaint(
             )
 
         await db.complaints.update_one(
-            {"_id": ObjectId(complaint_id)},
+            {"_id": complaint.get("_id")},
             {"$set": {
                 "status": "RESOLVED",
                 "proof_images": payload.proof_images,
@@ -478,7 +510,7 @@ async def resolve_complaint(
         )
 
         await db.complaint_history.insert_one({
-            "complaint_id": ObjectId(complaint_id),
+            "complaint_id": complaint.get("_id"),
             "action": "STATUS_CHANGED",
             "old_status": complaint.get("status"),
             "new_status": "RESOLVED",
@@ -516,7 +548,7 @@ async def update_complaint_status(
 ):
     """Unified endpoint to update complaint status"""
     try:
-        complaint = await db.complaints.find_one({"_id": ObjectId(complaint_id)})
+        complaint = await _find_complaint_by_identifier(complaint_id)
         if not complaint:
             return ResponseHandler.error(
                 message="Complaint not found",
@@ -533,7 +565,7 @@ async def update_complaint_status(
             )
 
         await db.complaints.update_one(
-            {"_id": ObjectId(complaint_id)},
+            {"_id": complaint.get("_id")},
             {"$set": {
                 "status": new_status,
                 "updated_at": datetime.utcnow()
@@ -541,7 +573,7 @@ async def update_complaint_status(
         )
 
         await db.complaint_history.insert_one({
-            "complaint_id": ObjectId(complaint_id),
+            "complaint_id": complaint.get("_id"),
             "action": "STATUS_CHANGED",
             "old_status": old_status,
             "new_status": new_status,
@@ -578,7 +610,7 @@ async def add_inspector_note(
 ):
     """Add a note to a complaint"""
     try:
-        complaint = await db.complaints.find_one({"_id": ObjectId(complaint_id)})
+        complaint = await _find_complaint_by_identifier(complaint_id)
         if not complaint:
             return ResponseHandler.error(
                 message="Complaint not found",
@@ -594,12 +626,12 @@ async def add_inspector_note(
         }
 
         await db.complaints.update_one(
-            {"_id": ObjectId(complaint_id)},
+            {"_id": complaint.get("_id")},
             {"$push": {"inspector_notes": new_note}, "$set": {"updated_at": datetime.utcnow()}}
         )
 
         await db.complaint_history.insert_one({
-            "complaint_id": ObjectId(complaint_id),
+            "complaint_id": complaint.get("_id"),
             "action": "NOTE_ADDED",
             "performed_by": ObjectId(current_user["user_id"]),
             "role": "INSPECTOR",
@@ -634,7 +666,7 @@ async def update_checklist(
 ):
     """Update field visit checklist"""
     try:
-        complaint = await db.complaints.find_one({"_id": ObjectId(complaint_id)})
+        complaint = await _find_complaint_by_identifier(complaint_id)
         if not complaint:
             return ResponseHandler.error(
                 message="Complaint not found",
@@ -642,7 +674,7 @@ async def update_checklist(
             )
 
         await db.complaints.update_one(
-            {"_id": ObjectId(complaint_id)},
+            {"_id": complaint.get("_id")},
             {"$set": {"field_checklist": payload.checklist, "updated_at": datetime.utcnow()}}
         )
 

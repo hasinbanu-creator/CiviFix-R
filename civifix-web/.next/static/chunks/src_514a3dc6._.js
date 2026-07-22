@@ -670,12 +670,13 @@ const AuthProvider = (param)=>{
             verifyRegister,
             signOut,
             clearError,
-            setError
+            setError,
+            setUser
         },
         children: children
     }, void 0, false, {
         fileName: "[project]/src/context/auth-context.tsx",
-        lineNumber: 134,
+        lineNumber: 135,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };

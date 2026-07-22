@@ -62,6 +62,7 @@ export default function CreateComplaintPage() {
   const [serverError, setServerError] = useState("");
   const [gpsLoading, setGpsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [createdComplaint, setCreatedComplaint] = useState<any>(null);
   const [step, setStep] = useState(1);
   const { data: wardsData, isLoading: wardsLoading } = useWards(user?.district || user?.district_id);
@@ -113,6 +114,7 @@ export default function CreateComplaintPage() {
     if (!form.ward_id) next.ward_id = "Please select a ward";
     if (!form.complaint_type) next.complaint_type = "Please select a complaint type";
     if (form.description.trim().length < 10) next.description = "Description must be at least 10 characters";
+    if (!form.latitude || !form.longitude) next.location = "Please provide your location";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -124,7 +126,16 @@ export default function CreateComplaintPage() {
     setLoading(true);
     setServerError("");
     try {
-      const result = await createComplaint.mutateAsync(form as any);
+      const formData = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      
+      selectedImages.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      const result = await createComplaint.mutateAsync(formData as any);
       setCreatedComplaint(result);
       setShowSuccess(true);
     } catch (err: any) {
@@ -277,6 +288,49 @@ export default function CreateComplaintPage() {
                     })}
                   </div>
                 </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Upload Photos (Optional)</label>
+                  <div className="border-2 border-dashed border-border rounded-2xl p-6 flex flex-col items-center justify-center bg-muted/20 hover:bg-muted/40 transition-colors relative cursor-pointer group">
+                    <input 
+                      type="file" 
+                      multiple 
+                      accept="image/*" 
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setSelectedImages([...selectedImages, ...Array.from(e.target.files)]);
+                        }
+                      }}
+                    />
+                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                       <FileText className="w-6 h-6 text-primary" />
+                    </div>
+                    <p className="text-sm font-bold text-foreground">Tap or drag images here</p>
+                    <p className="text-xs font-medium text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
+                  </div>
+                  
+                  {selectedImages.length > 0 && (
+                    <div className="flex flex-wrap gap-3 mt-4">
+                      {selectedImages.map((file, i) => (
+                        <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-border group shadow-sm">
+                          <img src={URL.createObjectURL(file)} alt="Preview" className="w-full h-full object-cover" />
+                          <button 
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedImages(selectedImages.filter((_, index) => index !== i));
+                            }}
+                            className="absolute top-1 right-1 bg-black/60 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="mt-8 flex justify-end">
@@ -328,6 +382,8 @@ export default function CreateComplaintPage() {
                   </div>
                   {errors.ward_id && <p className="text-destructive text-xs font-bold mt-1.5 ml-1">{errors.ward_id}</p>}
                 </div>
+                
+                {errors.location && <p className="text-destructive text-xs font-bold mt-1.5 ml-1">{errors.location}</p>}
 
                 <button
                   type="button"
@@ -380,6 +436,10 @@ export default function CreateComplaintPage() {
                   onClick={() => {
                     let isValid = true;
                     if (!form.ward_id) { updateField("ward_id", ""); isValid = false; }
+                    if (!form.latitude || !form.longitude) {
+                      setErrors((prev) => ({ ...prev, location: "Please use your current location to proceed" }));
+                      isValid = false; 
+                    }
                     if (isValid) setStep(3);
                   }}
                   className="py-4 px-8 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl font-black text-sm tracking-wide shadow-md shadow-primary/20 transition-all hover:-translate-y-0.5"
@@ -420,6 +480,9 @@ export default function CreateComplaintPage() {
                    <div className="flex justify-between"><span className="text-muted-foreground">Type:</span> <span className="text-foreground">{COMPLAINT_TYPES.find(t=>t.value===form.complaint_type)?.label}</span></div>
                    <div className="flex justify-between"><span className="text-muted-foreground">Priority:</span> <span className="text-foreground">{form.priority}</span></div>
                    <div className="flex justify-between"><span className="text-muted-foreground">Ward:</span> <span className="text-foreground truncate ml-4">{wards.find((w:any)=>w._id===form.ward_id)?.ward_name}</span></div>
+                   {selectedImages.length > 0 && (
+                     <div className="flex justify-between"><span className="text-muted-foreground">Attachments:</span> <span className="text-foreground">{selectedImages.length} photo(s)</span></div>
+                   )}
                 </div>
               </div>
 

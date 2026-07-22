@@ -254,10 +254,10 @@ export const authService = {
 
   // --- Uploads ---
   uploadImages: async (formData) => {
-    // Requires content-type multipart/form-data
     const response = await api.post(ENDPOINTS.UPLOAD_IMAGES, formData, {
+      timeout: 180000,
       headers: {
-        'Content-Type': 'multipart/form-data',
+        Accept: "application/json",
       },
     });
     return unwrapResponse(response);
@@ -274,8 +274,11 @@ export const authService = {
     return unwrapResponse(res);
   },
 
-  inspectorResolveComplaint: async (complaintId) => {
-    const res = await api.put(`/inspector/complaints/${complaintId}/resolve`);
+  inspectorResolveComplaint: async (complaintId, payload = {}) => {
+    const res = await api.put(`/inspector/complaints/${complaintId}/resolve`, {
+      proof_images: payload.proof_images || [],
+      note: payload.note || undefined,
+    });
     return unwrapResponse(res);
   },
 };

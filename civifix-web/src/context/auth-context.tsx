@@ -17,6 +17,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   clearError: () => void;
   setError: (msg: string | null) => void;
+  setUser: (user: UserProfile | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -145,6 +146,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signOut,
         clearError,
         setError,
+        setUser,
       }}
     >
       {children}

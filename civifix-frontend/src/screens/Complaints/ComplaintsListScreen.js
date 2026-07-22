@@ -16,7 +16,6 @@ import authService from "../../services/authService";
 import { AuthContext } from "../../context/AuthContext";
 import { getErrorMessage } from "../../services/api";
 import ComplaintCard from "./ComplaintCard";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── TOKENS ───────────────────────────────────────────────────────────────────
 const PRIMARY       = "#2563EB";
@@ -200,11 +199,9 @@ export const ComplaintsListScreen = ({ navigation }) => {
       
       let payload;
       if (user?.role === "INSPECTOR") {
-        const wardId = await AsyncStorage.getItem("inspectorSelectedWardId");
         payload = await authService.getWardComplaints({
           page: pageNum,
           limit: 10,
-          ...(wardId ? { ward_id: wardId } : {}),
         });
       } else if (user?.role === "WORKER") {
         payload = await authService.getAssignedComplaints({ page: pageNum, limit: 10 });
@@ -280,7 +277,7 @@ export const ComplaintsListScreen = ({ navigation }) => {
       ) : (
         <FlatList
           data={filtered}
-          keyExtractor={(item) => item._id || item.complaint_id || String(Math.random())}
+          keyExtractor={(item, index) => item?._id || item?.complaint_id || `complaint-${index}`}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           onEndReached={() => {

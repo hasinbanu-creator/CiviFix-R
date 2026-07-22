@@ -54,9 +54,9 @@ class WardService:
 
             # Create ward document
             ward_doc = ward_document(ward_data)
-            ward_doc["created_by"] = ObjectId(created_by_id)
-            ward_doc["district_id"] = ObjectId(ward_data.district_id)
-            ward_doc["inspector_id"] = ObjectId(ward_data.inspector_id)
+            ward_doc["created_by"] = ObjectId(created_by_id) if created_by_id and len(str(created_by_id)) == 24 else created_by_id
+            ward_doc["district_id"] = ObjectId(ward_data.district_id) if ward_data.district_id and len(str(ward_data.district_id)) == 24 else ward_data.district_id
+            ward_doc["inspector_id"] = ObjectId(ward_data.inspector_id) if ward_data.inspector_id and len(str(ward_data.inspector_id)) == 24 else ward_data.inspector_id
 
             # Save to database
             ward_id = await self.ward_repo.create(ward_doc)
@@ -136,7 +136,7 @@ class WardService:
             if update_data.ward_name:
                 update_dict["ward_name"] = update_data.ward_name
             if update_data.inspector_id:
-                update_dict["inspector_id"] = ObjectId(update_data.inspector_id)
+                update_dict["inspector_id"] = ObjectId(update_data.inspector_id) if update_data.inspector_id and len(str(update_data.inspector_id)) == 24 else update_data.inspector_id
             if update_data.is_active is not None:
                 update_dict["is_active"] = update_data.is_active
             if update_data.description is not None:

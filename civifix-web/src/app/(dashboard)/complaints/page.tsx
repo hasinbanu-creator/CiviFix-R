@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { useComplaints, useWardComplaints, useAssignedComplaints } from "@/hooks/use-complaints";
@@ -23,29 +23,34 @@ import {
   Lightbulb
 } from "lucide-react";
 
-// --- Types ---
 type ComplaintStatus = "OPEN" | "WORKING" | "APPROVAL" | "CLOSED" | "REJECTED" | "IN_PROGRESS" | "RESOLVED";
 type ComplaintType = "ROAD_DAMAGE" | "POTHOLE" | "GARBAGE" | "STREETLIGHT" | "WATER_SUPPLY" | "DRAINAGE" | "SANITATION" | "TREE_CUTTING" | "CONSTRUCTION" | "OTHER";
 
-// --- Design Tokens ---
 const FILTERS = [
   { key: "ALL",         label: "All",         icon: ClipboardList },
-  { key: "OPEN",        label: "Pending",      icon: FolderOpen },
-  { key: "IN_PROGRESS", label: "In Progress",  icon: Wrench },
-  { key: "WORKING",     label: "In Progress",  icon: Wrench },
-  { key: "RESOLVED",    label: "Resolved",     icon: CheckCircle2 },
-  { key: "CLOSED",      label: "Resolved",     icon: CheckCircle2 },
-  { key: "REJECTED",    label: "Rejected",     icon: XCircle },
+  { key: "PENDING",     label: "Pending",     icon: FolderOpen },
+  { key: "IN_PROGRESS", label: "In Progress", icon: Wrench },
+  { key: "RESOLVED",    label: "Resolved",    icon: CheckCircle2 },
+  { key: "REJECTED",    label: "Rejected",    icon: XCircle },
 ];
 
 const STATUS_STYLES: Record<string, { label: string; color: string; bg: string }> = {
   OPEN:        { label: "Pending",     color: "text-accent",    bg: "bg-accent/10" },
+  PENDING:     { label: "Pending",     color: "text-accent",    bg: "bg-accent/10" },
   WORKING:     { label: "In Progress", color: "text-primary",   bg: "bg-primary/10" },
-  IN_PROGRESS: { label: "In Progress", color: "text-primary",    bg: "bg-primary/10" },
-  APPROVAL:    { label: "Review",      color: "text-secondary",    bg: "bg-secondary/10" },
-  CLOSED:      { label: "Resolved",    color: "text-success", bg: "bg-success/10" },
-  RESOLVED:    { label: "Resolved",    color: "text-success", bg: "bg-success/10" },
-  REJECTED:    { label: "Rejected",    color: "text-destructive",     bg: "bg-destructive/10" },
+  IN_PROGRESS: { label: "In Progress", color: "text-primary",   bg: "bg-primary/10" },
+  ASSIGNED:    { label: "Assigned",    color: "text-primary",   bg: "bg-primary/10" },
+  APPROVAL:    { label: "Review",      color: "text-secondary", bg: "bg-secondary/10" },
+  CLOSED:      { label: "Resolved",    color: "text-success",   bg: "bg-success/10" },
+  RESOLVED:    { label: "Resolved",    color: "text-success",   bg: "bg-success/10" },
+  REJECTED:    { label: "Rejected",    color: "text-destructive",bg: "bg-destructive/10" },
+};
+
+const STATUS_GROUPS: Record<string, string[]> = {
+  PENDING: ["OPEN", "PENDING"],
+  IN_PROGRESS: ["WORKING", "IN_PROGRESS", "ASSIGNED", "APPROVAL"],
+  RESOLVED: ["CLOSED", "RESOLVED"],
+  REJECTED: ["REJECTED"]
 };
 
 const TYPE_META: Record<string, { icon: React.ElementType; color: string; bg: string; title: string }> = {
@@ -64,13 +69,15 @@ const TYPE_META: Record<string, { icon: React.ElementType; color: string; bg: st
 export default function ComplaintsListPage() {
   const { user } = useAuth();
   const [activeFilter, setActiveFilter] = useState("ALL");
+  const [searchTerm, setSearchTerm] = useState("");
   const role = user?.role || "CITIZEN";
 
   const isCitizen = role === "CITIZEN";
   const isInspector = role === "INSPECTOR";
   const isWorker = role === "WORKER";
   
-  const queryParams = { limit: 50, ...(activeFilter !== "ALL" ? { status: activeFilter } : {}) };
+  // We fetch all complaints without status filter so we can filter client-side
+  const queryParams = { limit: 100 };
 
   const citizenQuery = useComplaints(queryParams, { enabled: isCitizen || role === "SUPER_ADMIN" || role === "DISTRICT_ADMIN" });
   const inspectorQuery = useWardComplaints(queryParams, { enabled: isInspector });
@@ -79,26 +86,62 @@ export default function ComplaintsListPage() {
   const activeQuery = isInspector ? inspectorQuery : isWorker ? workerQuery : citizenQuery;
   const loading = activeQuery.isLoading;
   const data: any = activeQuery.data;
-  // Inspector API returns { complaints: [...] }, citizen API returns { data: [...] }
-  const complaints = data?.complaints || data?.data || [];
-  const filteredComplaints = complaints;
-  console.log("activeQuery.data", activeQuery.data);
-  console.log("complaints", complaints);
+  
+  // Memoize complaints to prevent unnecessary recalculations
+  const complaints = useMemo(() => data?.complaints || data?.data || [], [data]);
 
   const counts = useMemo(() => {
-    const acc: Record<string, number> = {};
+    const acc: Record<string, number> = {
+      ALL: complaints.length,
+      PENDING: 0,
+      IN_PROGRESS: 0,
+      RESOLVED: 0,
+      REJECTED: 0
+    };
+    
     complaints.forEach((c: any) => {
       const s = c.status || "OPEN";
-      acc[s] = (acc[s] || 0) + 1;
+      if (STATUS_GROUPS.PENDING.includes(s)) acc.PENDING++;
+      else if (STATUS_GROUPS.IN_PROGRESS.includes(s)) acc.IN_PROGRESS++;
+      else if (STATUS_GROUPS.RESOLVED.includes(s)) acc.RESOLVED++;
+      else if (STATUS_GROUPS.REJECTED.includes(s)) acc.REJECTED++;
     });
     return acc;
   }, [complaints]);
 
+  const filteredComplaints = useMemo(() => {
+    return complaints.filter((c: any) => {
+      // 1. Status Filter
+      if (activeFilter !== "ALL") {
+        const allowedStatuses = STATUS_GROUPS[activeFilter] || [];
+        if (!allowedStatuses.includes(c.status || "OPEN")) {
+          return false;
+        }
+      }
+      // 2. Search Term Filter
+      if (searchTerm.trim() !== "") {
+        const term = searchTerm.toLowerCase();
+        const type = c.complaint_type || "OTHER";
+        const meta = TYPE_META[type] || TYPE_META.OTHER;
+        const matchesTitle = (c.title || meta.title).toLowerCase().includes(term);
+        const matchesDesc = (c.description || "").toLowerCase().includes(term);
+        const matchesId = (c.complaint_id || c._id || "").toLowerCase().includes(term);
+        const matchesAddress = (c.address || c.ward?.ward_name || "").toLowerCase().includes(term);
+        
+        if (!matchesTitle && !matchesDesc && !matchesId && !matchesAddress) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [complaints, activeFilter, searchTerm]);
+
   const summaryChips = [
-    { label: "Total", value: complaints.length, colorClass: "text-foreground" },
-    { label: "Active", value: (counts.OPEN || 0) + (counts.WORKING || 0) + (counts.IN_PROGRESS || 0) + (counts.APPROVAL || 0), colorClass: "text-primary" },
-    { label: "Resolved", value: (counts.CLOSED || 0) + (counts.RESOLVED || 0), colorClass: "text-success" },
-    { label: "Rejected", value: counts.REJECTED || 0, colorClass: "text-destructive" },
+    { label: "Total", value: counts.ALL, colorClass: "text-foreground" },
+    { label: "Pending", value: counts.PENDING, colorClass: "text-accent" },
+    { label: "Active", value: counts.IN_PROGRESS, colorClass: "text-primary" },
+    { label: "Resolved", value: counts.RESOLVED, colorClass: "text-success" },
+    { label: "Rejected", value: counts.REJECTED, colorClass: "text-destructive" },
   ];
 
   return (
@@ -128,7 +171,7 @@ export default function ComplaintsListPage() {
             {summaryChips.map(chip => (
               <div key={chip.label} className="flex-1 flex flex-col items-center justify-center">
                 <span className={`text-2xl font-black ${chip.colorClass}`}>{chip.value}</span>
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">{chip.label}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1 hidden sm:block">{chip.label}</span>
               </div>
             ))}
           </div>
@@ -140,7 +183,7 @@ export default function ComplaintsListPage() {
             <div className="flex gap-3 pb-2">
               {FILTERS.map(f => {
                 const isSelected = activeFilter === f.key;
-                const count = f.key === "ALL" ? complaints.length : (counts[f.key] || 0);
+                const count = counts[f.key] || 0;
                 const Icon = f.icon;
                 
                 return (
@@ -171,9 +214,28 @@ export default function ComplaintsListPage() {
           </div>
         )}
 
-        {/* Result Count */}
+        {/* Search Bar & Result Count (Mobile) */}
         {!loading && complaints.length > 0 && (
-          <div className="px-6 md:px-12 mt-6 mb-2">
+          <div className="px-6 md:px-12 mt-6 mb-2 flex flex-col md:hidden gap-4">
+            <div className="relative">
+              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input 
+                type="text" 
+                placeholder="Search complaints..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-2xl text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" 
+              />
+            </div>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest pl-2">
+              {filteredComplaints.length} {activeFilter === "ALL" ? "total" : activeFilter.toLowerCase().replace("_", " ")} complaints
+            </p>
+          </div>
+        )}
+        
+        {/* Result Count (Desktop) */}
+        {!loading && complaints.length > 0 && (
+          <div className="hidden md:block px-6 md:px-12 mt-6 mb-2">
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
               {filteredComplaints.length} {activeFilter === "ALL" ? "total" : activeFilter.toLowerCase().replace("_", " ")} complaints
             </p>
@@ -205,12 +267,12 @@ export default function ComplaintsListPage() {
           ) : filteredComplaints.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center col-span-full bg-card rounded-3xl border border-border shadow-sm">
               <Filter className="w-12 h-12 text-muted-foreground mb-6" />
-              <p className="text-sm font-bold text-muted-foreground">No {activeFilter.toLowerCase().replace("_", " ")} complaints found.</p>
+              <p className="text-sm font-bold text-muted-foreground">No complaints match your criteria.</p>
               <button 
-                onClick={() => setActiveFilter("ALL")}
+                onClick={() => { setActiveFilter("ALL"); setSearchTerm(""); }}
                 className="text-primary font-black text-sm mt-4 hover:underline"
               >
-                Show all
+                Clear filters and search
               </button>
             </div>
           ) : (
@@ -220,12 +282,13 @@ export default function ComplaintsListPage() {
                 <div className="flex items-center justify-between p-6 border-b border-border">
                   <div className="relative">
                     <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <input type="text" placeholder="Search complaints..." className="pl-10 pr-4 py-2 bg-muted rounded-full text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-64" />
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-border text-sm font-bold hover:bg-muted transition-colors">
-                      <Filter className="w-4 h-4" /> Filter
-                    </button>
+                    <input 
+                      type="text" 
+                      placeholder="Search complaints..." 
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 pr-4 py-2 bg-muted border border-border rounded-full text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-64" 
+                    />
                   </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -280,7 +343,7 @@ export default function ComplaintsListPage() {
                               )}
                             </td>
                             <td className="p-4 pr-6 text-right">
-                              <div className="w-8 h-8 rounded-full hover:bg-primary/10 flex items-center justify-center ml-auto transition-colors">
+                              <div className="w-8 h-8 rounded-full group-hover:bg-primary/10 flex items-center justify-center ml-auto transition-colors">
                                 <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                               </div>
                             </td>
@@ -292,10 +355,6 @@ export default function ComplaintsListPage() {
                 </div>
                 <div className="p-4 border-t border-border flex items-center justify-between text-sm text-muted-foreground font-semibold">
                    <span>Showing 1 to {filteredComplaints.length} of {filteredComplaints.length} entries</span>
-                   <div className="flex gap-1">
-                     <button className="px-3 py-1 border border-border rounded-lg hover:bg-muted disabled:opacity-50" disabled>Prev</button>
-                     <button className="px-3 py-1 border border-border rounded-lg hover:bg-muted disabled:opacity-50" disabled>Next</button>
-                   </div>
                 </div>
               </div>
               
@@ -355,7 +414,7 @@ export default function ComplaintsListPage() {
                           <div className="flex items-center justify-between mt-2 pt-4 border-t border-border/50">
                             <div className="flex items-center gap-3">
                               <span className="text-xs font-black text-muted-foreground tracking-wider bg-muted px-2.5 py-1 rounded-md">
-                                {complaint.complaint_id || complaint._id}
+                                {complaint.complaint_id || complaint._id?.substring(0,6).toUpperCase()}
                               </span>
                               <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
                                 <Clock className="w-3.5 h-3.5" />

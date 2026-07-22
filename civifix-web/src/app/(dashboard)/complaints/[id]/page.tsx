@@ -115,6 +115,8 @@ export default function ComplaintDetailsPage() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showResolveModal, setShowResolveModal] = useState(false);
   const [newNote, setNewNote] = useState("");
+  const [selectedProofImages, setSelectedProofImages] = useState<File[]>([]);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
 
   const updateStatus = async (newStatus: string) => {
     try {
@@ -163,8 +165,18 @@ export default function ComplaintDetailsPage() {
   const handleResolveConfirm = async () => {
     try {
       setUpdating(true);
+      
+      if (selectedProofImages.length > 0) {
+        const formData = new FormData();
+        selectedProofImages.forEach(file => {
+          formData.append("proof_images", file);
+        });
+        await complaintsApi.resolveComplaintWithImages(id, formData);
+      } else {
+        await authService.inspectorResolveComplaint(id);
+      }
+      
       setShowResolveModal(false);
-      await authService.inspectorResolveComplaint(id);
       refetch();
       queryClient.invalidateQueries({ queryKey: ["ward-complaints"] });
       queryClient.invalidateQueries({ queryKey: ["complaints"] });
@@ -224,7 +236,7 @@ export default function ComplaintDetailsPage() {
     <div className="flex-1 bg-background min-h-screen pb-20 md:pb-8">
       
       {/* Header */}
-      <div className="bg-primary pt-10 pb-16 px-6 md:px-12 md:rounded-b-[60px] rounded-b-[40px] shadow-lg flex items-start justify-between">
+      <div className={`${isInspectorOrWorker ? "bg-gradient-to-br from-teal-800 to-teal-600" : "bg-primary"} pt-10 pb-16 px-6 md:px-12 md:rounded-b-[60px] rounded-b-[40px] shadow-lg flex items-start justify-between`}>
         <div className="max-w-3xl mx-auto w-full flex items-start justify-between">
           <div className="flex items-start gap-4">
             <button 
@@ -290,6 +302,23 @@ export default function ComplaintDetailsPage() {
             label="Coordinates" 
             value={complaint.latitude && complaint.longitude ? `${complaint.latitude}, ${complaint.longitude}` : null} 
           />
+
+          {complaint.image_urls && complaint.image_urls.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-border/50">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4">Attached Images</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {complaint.image_urls.map((url: string, index: number) => (
+                  <div 
+                    key={index} 
+                    className="relative aspect-square rounded-2xl overflow-hidden border border-border shadow-sm cursor-pointer group"
+                    onClick={() => setSelectedImagePreview(url)}
+                  >
+                    <img src={url} alt={`Complaint ${index+1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {(complaint.citizen_note || complaint.worker_note || complaint.inspector_note || complaint.rejection_reason) && (
             <>
@@ -382,25 +411,25 @@ export default function ComplaintDetailsPage() {
           <>
             {/* OPEN: Start Work + Reject */}
             {complaint.status === "OPEN" && (
-              <div className="bg-card rounded-[2rem] p-6 shadow-sm border border-border mb-6">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border/50">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <MoreVertical className="w-5 h-5 text-primary" />
+              <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 mb-6">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+                    <MoreVertical className="w-5 h-5 text-teal-600" />
                   </div>
-                  <h3 className="text-lg font-black text-foreground">Complaint Actions</h3>
+                  <h3 className="text-lg font-black text-slate-800">Complaint Actions</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     disabled={updating}
                     onClick={handleStartWork}
-                    className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl py-4 text-sm font-bold shadow-md shadow-primary/20 disabled:opacity-50 transition-all hover:-translate-y-0.5"
+                    className="flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl py-4 text-sm font-bold shadow-md shadow-teal-600/20 disabled:opacity-50 transition-all hover:-translate-y-0.5"
                   >
                     <Play className="w-5 h-5" /> Start Work
                   </button>
                   <button
                     disabled={updating}
                     onClick={() => setShowRejectModal(true)}
-                    className="flex items-center justify-center gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-2xl py-4 text-sm font-bold shadow-md shadow-destructive/20 disabled:opacity-50 transition-all hover:-translate-y-0.5"
+                    className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white rounded-2xl py-4 text-sm font-bold shadow-md shadow-red-500/20 disabled:opacity-50 transition-all hover:-translate-y-0.5"
                   >
                     <X className="w-5 h-5" /> Reject
                   </button>
@@ -410,17 +439,17 @@ export default function ComplaintDetailsPage() {
 
             {/* IN_PROGRESS: Resolve */}
             {complaint.status === "IN_PROGRESS" && (
-              <div className="bg-card rounded-[2rem] p-6 shadow-sm border border-border mb-6">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border/50">
-                  <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-success" />
+              <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 mb-6">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-teal-600" />
                   </div>
-                  <h3 className="text-lg font-black text-foreground">Complaint Actions</h3>
+                  <h3 className="text-lg font-black text-slate-800">Complaint Actions</h3>
                 </div>
                 <button
                   disabled={updating}
                   onClick={() => setShowResolveModal(true)}
-                  className="w-full flex items-center justify-center gap-2 bg-success hover:bg-success/90 text-success-foreground rounded-2xl py-4 text-sm font-bold shadow-md shadow-success/20 disabled:opacity-50 transition-all hover:-translate-y-0.5"
+                  className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl py-4 text-sm font-bold shadow-md shadow-teal-600/20 disabled:opacity-50 transition-all hover:-translate-y-0.5"
                 >
                   <Check className="w-5 h-5" /> Resolve Complaint
                 </button>
@@ -472,7 +501,7 @@ export default function ComplaintDetailsPage() {
                 <button
                   disabled={updating}
                   onClick={handleRejectConfirm}
-                  className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold py-3.5 rounded-2xl shadow-md shadow-destructive/20 disabled:opacity-50 transition-colors"
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-2xl shadow-md shadow-red-500/20 disabled:opacity-50 transition-colors"
                 >
                   Reject
                 </button>
@@ -491,9 +520,52 @@ export default function ComplaintDetailsPage() {
                 </div>
                 <h3 className="text-xl font-black text-foreground">Mark Resolved</h3>
               </div>
-              <p className="text-sm font-medium text-muted-foreground leading-relaxed mb-8">
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed mb-6">
                 Have you verified that the issue has been successfully resolved?
               </p>
+              
+              <div className="mb-8">
+                <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Proof Images (Optional)</label>
+                <div className="border-2 border-dashed border-border rounded-2xl p-6 flex flex-col items-center justify-center bg-muted/20 hover:bg-muted/40 transition-colors relative cursor-pointer group">
+                  <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        setSelectedProofImages([...selectedProofImages, ...Array.from(e.target.files)]);
+                      }
+                    }}
+                  />
+                  <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                     <FileText className="w-5 h-5 text-success" />
+                  </div>
+                  <p className="text-sm font-bold text-foreground">Tap or drag images here</p>
+                </div>
+                
+                {selectedProofImages.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {selectedProofImages.map((file, i) => (
+                      <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden border border-border group shadow-sm">
+                        <img src={URL.createObjectURL(file)} alt="Preview" className="w-full h-full object-cover" />
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setSelectedProofImages(selectedProofImages.filter((_, index) => index !== i));
+                          }}
+                          className="absolute top-1 right-1 bg-black/60 text-white w-5 h-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-4">
                 <button
                   disabled={updating}
@@ -505,12 +577,22 @@ export default function ComplaintDetailsPage() {
                 <button
                   disabled={updating}
                   onClick={handleResolveConfirm}
-                  className="flex-1 bg-success hover:bg-success/90 text-success-foreground font-bold py-3.5 rounded-2xl shadow-md shadow-success/20 disabled:opacity-50 transition-colors"
+                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-2xl shadow-md shadow-teal-600/20 disabled:opacity-50 transition-colors"
                 >
                   Confirm
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Fullscreen Image Preview Modal */}
+        {selectedImagePreview && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center" onClick={() => setSelectedImagePreview(null)}>
+            <button className="absolute top-6 right-6 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
+              <X className="w-6 h-6 text-white" />
+            </button>
+            <img src={selectedImagePreview} alt="Fullscreen Preview" className="max-w-[90vw] max-h-[90vh] object-contain rounded-xl" />
           </div>
         )}
 

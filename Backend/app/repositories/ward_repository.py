@@ -28,7 +28,11 @@ class WardRepository:
     async def get_by_id(self, ward_id: str) -> Optional[dict]:
         """Get ward by ID"""
         try:
-            ward = await self.collection.find_one({"_id": ObjectId(ward_id)})
+            try:
+                resolved_id = ObjectId(ward_id)
+            except Exception:
+                resolved_id = ward_id
+            ward = await self.collection.find_one({"_id": resolved_id})
             return ward
         except Exception as e:
             logger.error(f"Error fetching ward: {str(e)}")
@@ -39,7 +43,7 @@ class WardRepository:
         try:
             ward = await self.collection.find_one({
                 "ward_number": ward_number,
-                "district_id": ObjectId(district_id)
+                "district_id": ObjectId(district_id) if district_id and len(str(district_id)) == 24 else district_id
             })
             return ward
         except Exception as e:
@@ -108,7 +112,7 @@ class WardRepository:
     ) -> tuple[List[dict], int]:
         """List wards assigned to inspector"""
         try:
-            query = {"inspector_id": ObjectId(inspector_id)}
+            query = {"inspector_id": ObjectId(inspector_id) if inspector_id and len(str(inspector_id)) == 24 else inspector_id}
             total = await self.collection.count_documents(query)
             
             wards = await self.collection.find(query)\
@@ -132,7 +136,7 @@ class WardRepository:
         """Search wards by name"""
         try:
             query = {
-                "district_id": ObjectId(district_id),
+                "district_id": ObjectId(district_id) if district_id and len(str(district_id)) == 24 else district_id,
                 "$or": [
                     {"ward_name": {"$regex": search_query, "$options": "i"}},
                     {"ward_number": {"$regex": search_query, "$options": "i"}}
@@ -191,7 +195,7 @@ class WardRepository:
     async def exists(self, ward_id: str) -> bool:
         """Check if ward exists"""
         try:
-            count = await self.collection.count_documents({"_id": ObjectId(ward_id)})
+            count = await self.collection.count_documents({"_id": ObjectId(ward_id) if ward_id and len(str(ward_id)) == 24 else ward_id})
             return count > 0
         except Exception as e:
             logger.error(f"Error checking ward existence: {str(e)}")

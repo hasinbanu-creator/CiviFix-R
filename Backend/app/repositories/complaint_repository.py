@@ -16,6 +16,27 @@ class ComplaintRepository:
         self.collection = db["complaints"]
         self.history_collection = db["complaint_history"]
 
+    @staticmethod
+    def _normalize_id(value):
+        """Convert valid Mongo IDs while preserving non-Mongo identifier strings."""
+        if value is None:
+            return None
+        if isinstance(value, ObjectId):
+            return value
+        if isinstance(value, str):
+            try:
+                return ObjectId(value)
+            except Exception:
+                return value
+        return value
+
+    def _build_id_query(self, complaint_id):
+        """Build a lookup query that works for either an internal Mongo ID or a public complaint id."""
+        normalized = self._normalize_id(complaint_id)
+        if isinstance(normalized, ObjectId):
+            return {"$or": [{"_id": normalized}, {"complaint_id": str(complaint_id)}]}
+        return {"$or": [{"_id": normalized}, {"complaint_id": complaint_id}]}
+
     async def create(self, complaint_data: dict) -> str:
         """Create a new complaint"""
         try:
@@ -27,9 +48,9 @@ class ComplaintRepository:
             raise
 
     async def get_by_id(self, complaint_id: str) -> Optional[dict]:
-        """Get complaint by MongoDB ID"""
+        """Get complaint by MongoDB ID or public complaint_id string."""
         try:
-            complaint = await self.collection.find_one({"_id": ObjectId(complaint_id)})
+            complaint = await self.collection.find_one(self._build_id_query(complaint_id))
             return complaint
         except Exception as e:
             logger.error(f"Error fetching complaint: {str(e)}")
@@ -49,7 +70,7 @@ class ComplaintRepository:
         try:
             update_data["updated_at"] = datetime.utcnow()
             result = await self.collection.update_one(
-                {"_id": ObjectId(complaint_id)},
+                self._build_id_query(complaint_id),
                 {"$set": update_data}
             )
             logger.info(f"Complaint updated: {complaint_id}")
@@ -254,12 +275,11 @@ class ComplaintRepository:
             raise
 
     async def get_history(self, complaint_id: str) -> List[dict]:
-        """Get complaint history"""
+        """Get complaint history by internal complaint id or public complaint id."""
         try:
-            history = await self.history_collection.find(
-                {"complaint_id": ObjectId(complaint_id)}
-            ).sort("timestamp", 1).to_list(length=100)
-            
+            normalized = self._normalize_id(complaint_id)
+            query = {"complaint_id": normalized} if isinstance(normalized, ObjectId) else {"complaint_id": complaint_id}
+            history = await self.history_collection.find(query).sort("timestamp", 1).to_list(length=100)
             return history
         except Exception as e:
             logger.error(f"Error fetching complaint history: {str(e)}")

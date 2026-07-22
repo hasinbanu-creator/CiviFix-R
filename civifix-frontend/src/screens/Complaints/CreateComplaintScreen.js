@@ -17,13 +17,25 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert, Image } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
+
+const EMPTY_FORM = {
+  ward_id: "",
+  complaint_type: "",
+  description: "",
+  latitude: "",
+  longitude: "",
+  address: "",
+  citizen_note: "",
+  priority: "MEDIUM",
+};
 import { COLORS, FONT_SIZES, SPACING, SHADOWS } from "../../constants/theme";
 import authService from "../../services/authService";
 import { AuthContext } from "../../context/AuthContext";
 import { getErrorMessage } from "../../services/api";
+import { resolveImageUri } from "../../utils/imageUri";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -315,44 +327,18 @@ const PrioritySelector = ({ value, onChange }) => (
 // ─── MAIN SCREEN ──────────────────────────────────────────────────────────────
 export const CreateComplaintScreen = ({ route, navigation }) => {
   const { user } = useContext(AuthContext);
-  const initialDraft = route.params?.draft;
-
-  const [form, setForm] = useState({
-    ward_id: "", complaint_type: "", description: "",
-    latitude: "", longitude: "", address: "", citizen_note: "", priority: "MEDIUM",
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors]             = useState({});
   const [loading, setLoading]           = useState(false);
   const [serverError, setServerError]   = useState("");
   const [wards, setWards]               = useState([]);
   const [wardsLoading, setWardsLoading] = useState(true);
   const [gpsLoading, setGpsLoading]     = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [successData, setSuccessData]   = useState(null);
 
-  // Draft loading
-  useEffect(() => {
-    if (initialDraft) {
-      setForm(initialDraft);
-      return;
-    }
-    const loadDraft = async () => {
-      try {
-        const draft = await AsyncStorage.getItem("complaintDraft");
-        if (draft) {
-          setForm(JSON.parse(draft));
-        }
-      } catch (e) {}
-    };
-    loadDraft();
-  }, []);
-
-  // Draft saving
-  useEffect(() => {
-    const saveDraft = setTimeout(() => {
-      AsyncStorage.setItem("complaintDraft", JSON.stringify(form));
-    }, 1000);
-    return () => clearTimeout(saveDraft);
-  }, [form]);
+  useEffect(() => { setForm(EMPTY_FORM); }, []);
 
   useEffect(() => { fetchWards(); }, []);
 
@@ -413,14 +399,100 @@ export const CreateComplaintScreen = ({ route, navigation }) => {
     return Object.keys(next).length === 0;
   };
 
+  const pickImages = async () => {
+    if (selectedImages.length >= 5) {
+      Alert.alert("Limit reached", "You can attach up to 5 photos.");
+      return;
+    }
+
+    try {
+      const permission = await ImagePicker.getMediaLibraryPermissionsAsync();
+      let status = permission.status;
+
+      if (!permission.granted) {
+        const request = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        status = request.status;
+      }
+
+      if (status !== "granted") {
+        Alert.alert("Permission needed", "Please allow access to your photo library to attach images.");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        selectionLimit: 5 - selectedImages.length,
+        quality: 0.9,
+      });
+
+      if (result.canceled) return;
+
+      const pickedImages = (result.assets || []).map((asset) => ({
+        uri: asset.uri,
+        name: asset.fileName || `photo-${Date.now()}.jpg`,
+        type: asset.type || "image/jpeg",
+      }));
+
+      setSelectedImages((prev) => [...prev, ...pickedImages].slice(0, 5));
+    } catch (error) {
+      console.log("[CreateComplaintScreen] pickImages error", error);
+      Alert.alert("Gallery error", "Unable to open the photo library right now. Please try again.");
+    }
+  };
+
+  const uploadImagesToServer = async () => {
+    if (selectedImages.length === 0) return [];
+
+    setUploadingImages(true);
+    try {
+      const encodedImages = [];
+      for (const image of selectedImages) {
+        try {
+          const response = await fetch(image.uri);
+          const blob = await response.blob();
+          const base64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          encodedImages.push(base64);
+        } catch (innerError) {
+          console.log("[CreateComplaintScreen] base64 conversion error", innerError);
+          throw innerError;
+        }
+      }
+
+      return encodedImages;
+    } catch (error) {
+      console.log("[CreateComplaintScreen] uploadImagesToServer error", error);
+      Alert.alert("Upload failed", "The image data could not be prepared for submission. Please try again.");
+      throw error;
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
   const submit = async () => {
     if (!validate()) return;
-    navigation.navigate("ComplaintPreview", {
-      form,
-      ward: wardItems.find((w) => w.value === form.ward_id),
-      selectedType,
-      selectedPri,
-    });
+
+    try {
+      setLoading(true);
+      const uploadedImageUrls = await uploadImagesToServer();
+      const nextForm = { ...form, image_urls: uploadedImageUrls };
+
+      navigation.navigate("ComplaintPreview", {
+        form: nextForm,
+        ward: wardItems.find((w) => w.value === form.ward_id),
+        selectedType,
+        selectedPri,
+      });
+    } catch {
+      setServerError("Unable to upload photos. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const wardItems = wards.map((w) => ({
@@ -565,6 +637,38 @@ export const CreateComplaintScreen = ({ route, navigation }) => {
               multiline
               numberOfLines={3}
             />
+
+            <TouchableOpacity
+              style={styles.uploadBtn}
+              onPress={pickImages}
+              disabled={uploadingImages || selectedImages.length >= 5}
+              activeOpacity={0.8}
+            >
+              {uploadingImages ? (
+                <ActivityIndicator size="small" color={PRIMARY} />
+              ) : (
+                <Icon name="image-multiple-outline" size={18} color={PRIMARY} />
+              )}
+              <Text style={styles.uploadBtnText}>
+                {uploadingImages ? "Uploading…" : selectedImages.length > 0 ? `Add more photos (${selectedImages.length}/5)` : "Upload photos from gallery"}
+              </Text>
+            </TouchableOpacity>
+
+            {selectedImages.length > 0 && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
+                {selectedImages.map((image, index) => (
+                  <View key={`${image.name}-${index}`} style={styles.imagePreviewWrap}>
+                    <Image source={{ uri: image.uri }} style={styles.imagePreview} />
+                    <TouchableOpacity
+                      style={styles.removeImageBtn}
+                      onPress={() => setSelectedImages((prev) => prev.filter((_, idx) => idx !== index))}
+                    >
+                      <Icon name="close" size={12} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
           </FormCard>
 
           {/* ── Summary preview ── */}

@@ -19,6 +19,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { SPACING } from "../../constants/theme";
 
 import { API_URL } from "../../constants/endpoints";
+import { resolveImageUri } from "../../utils/imageUri";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -171,7 +172,7 @@ function HistoryItem({ item, complaint, isLast }) {
         {item.new_status && (item.new_status.toUpperCase() === "RESOLVED" || item.new_status.toUpperCase() === "CLOSED") && complaint?.proof_images?.length > 0 && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
             {complaint.proof_images.map((img, idx) => (
-              <Image key={idx} source={{ uri: img.startsWith("http") ? img : `${API_URL}${img}` }} style={{ width: 80, height: 80, borderRadius: 8, marginRight: 8 }} />
+              <Image key={idx} source={{ uri: resolveImageUri(img, API_URL) }} style={{ width: 80, height: 80, borderRadius: 8, marginRight: 8 }} />
             ))}
           </ScrollView>
         )}
@@ -293,7 +294,21 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
   const handleResolve = async () => {
     try {
       setSubmitting(true);
-      await authService.inspectorResolveComplaint(complaintId);
+      const proofImages = Array.isArray(complaint?.image_urls) && complaint.image_urls.length > 0
+        ? complaint.image_urls
+        : Array.isArray(complaint?.proof_images) && complaint.proof_images.length > 0
+          ? complaint.proof_images
+          : [];
+
+      if (proofImages.length === 0) {
+        alert("Please attach at least one proof image before resolving this complaint.");
+        return;
+      }
+
+      await authService.inspectorResolveComplaint(complaintId, {
+        proof_images: proofImages,
+        note: "Resolved by inspector after verification",
+      });
       alert("Complaint resolved!");
       const data = await authService.getComplaint(complaintId);
       setComplaint(data);
@@ -305,6 +320,11 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
   };
 
   const statusCfg = getStatus(complaint?.status);
+  const complaintImages = Array.isArray(complaint?.image_urls) && complaint.image_urls.length > 0
+    ? complaint.image_urls
+    : Array.isArray(complaint?.proof_images) && complaint.proof_images.length > 0
+      ? complaint.proof_images
+      : [];
 
   return (
     <View style={styles.flex}>
@@ -376,6 +396,18 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
             <InfoRow icon="crosshairs-gps"        label="Coordinates"
               value={complaint?.latitude && complaint?.longitude
                 ? `${complaint.latitude}, ${complaint.longitude}` : null} />
+
+            {complaintImages.length > 0 && (
+              <>
+                <View style={styles.cardDivider} />
+                <SectionTitle title="Attached Photos" icon="image-multiple-outline" />
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageRow}>
+                  {complaintImages.map((img, idx) => (
+                    <Image key={`${img}-${idx}`} source={{ uri: resolveImageUri(img, API_URL) }} style={styles.previewImage} />
+                  ))}
+                </ScrollView>
+              </>
+            )}
 
             {/* Notes section */}
             {(complaint?.citizen_note || complaint?.worker_note ||
@@ -616,6 +648,14 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 10, fontWeight: "700", color: GRAY_400,
     letterSpacing: 0.6, textTransform: "uppercase",
+  },
+  imageRow: { marginTop: SPACING.xs },
+  previewImage: {
+    width: 96,
+    height: 96,
+    borderRadius: 12,
+    marginRight: SPACING.sm,
+    backgroundColor: GRAY_100,
   },
   infoValue: { fontSize: 14, color: GRAY_800, marginTop: SPACING.xs, lineHeight: 20 },
 

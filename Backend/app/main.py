@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 import os
 
 from app.core.config import settings
@@ -65,9 +66,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityHeadersMiddleware)
 
-# Mount uploads directory
-os.makedirs("uploads", exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+# Mount uploads and assets directories
+BASE_DIR = Path(__file__).resolve().parent.parent
+UPLOADS_DIR = BASE_DIR / "uploads"
+ASSETS_DIR = BASE_DIR / "assets"
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
+app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
 
 # Exception handlers
 app.add_exception_handler(CivifixException, civifix_exception_handler)
