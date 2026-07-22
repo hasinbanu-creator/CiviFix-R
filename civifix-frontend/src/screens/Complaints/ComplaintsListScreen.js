@@ -201,7 +201,11 @@ export const ComplaintsListScreen = ({ navigation }) => {
       let payload;
       if (user?.role === "INSPECTOR") {
         const wardId = await AsyncStorage.getItem("inspectorSelectedWardId");
-        payload = await authService.getWardComplaints({ page: pageNum, limit: 10, ward_id: wardId });
+        payload = await authService.getWardComplaints({
+          page: pageNum,
+          limit: 10,
+          ...(wardId ? { ward_id: wardId } : {}),
+        });
       } else if (user?.role === "WORKER") {
         payload = await authService.getAssignedComplaints({ page: pageNum, limit: 10 });
       } else {
