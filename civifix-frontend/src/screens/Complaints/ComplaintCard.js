@@ -39,6 +39,19 @@ const formatDate = (dateStr) => {
   } catch { return null; }
 };
 
+const getWardDisplayLabel = (complaint) => {
+  const wardValue = complaint?.ward_id || complaint?.ward_name || complaint?.ward;
+
+  if (typeof wardValue === "string" && wardValue.trim()) return wardValue;
+  if (wardValue && typeof wardValue === "object") {
+    if (typeof wardValue.ward_name === "string" && wardValue.ward_name.trim()) return wardValue.ward_name;
+    if (typeof wardValue.name === "string" && wardValue.name.trim()) return wardValue.name;
+    if (wardValue.ward_number != null) return `Ward #${wardValue.ward_number}`;
+  }
+
+  return "Ward not provided";
+};
+
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 
 export const ComplaintCard = ({ complaint, onPress }) => {
@@ -50,7 +63,7 @@ export const ComplaintCard = ({ complaint, onPress }) => {
   const address   = complaint?.address || "Address not provided";
   const id        = complaint?.complaint_id || complaint?._id || "";
   const date      = formatDate(complaint?.created_at || complaint?.createdAt);
-  const ward      = complaint?.ward_id?.ward_name || complaint?.ward_name || complaint?.ward || "Ward not provided";
+  const ward      = getWardDisplayLabel(complaint);
   const citizen   = complaint?.user_id?.name || complaint?.citizen_name || "Citizen";
   const priority  = complaint?.priority || "MEDIUM";
 
