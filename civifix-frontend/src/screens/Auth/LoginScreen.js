@@ -130,7 +130,8 @@ export const LoginScreen = ({ navigation }) => {
               loading={loading}
               onPress={handleLogin}
               disabled={loading}
-              style={{ marginTop: 4, marginBottom: SPACING.lg }}
+              style={styles.continueButton}
+              textStyle={styles.continueButtonText}
             />
 
             <View style={styles.registerRow}>
@@ -139,22 +140,6 @@ export const LoginScreen = ({ navigation }) => {
                 <Text style={styles.registerLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>
-
-            <Text style={styles.orText}>or continue with</Text>
-
-
-            <View style={styles.socialRow}>
-              <TouchableOpacity style={styles.socialBtn}>
-                <Icon name="google" size={22} color="#EA4335" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.socialBtn}>
-                <Icon name="apple" size={22} color="#000" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.socialBtn}>
-                <Icon name="dots-horizontal" size={22} color="#555" />
-              </TouchableOpacity>
-            </View>
-            
           </View>
 
           {/* BOTTOM: sign up + ToS pinned to screen bottom */}
