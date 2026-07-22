@@ -60,6 +60,19 @@ const ROLE_META = {
   CITIZEN:        { label: "Citizen",        color: "#D97706",      bg: "#FEF3C7" },
 };
 
+const getWardDisplayLabel = (complaint) => {
+  const wardValue = complaint?.ward_id || complaint?.ward_name || complaint?.ward;
+
+  if (typeof wardValue === "string" && wardValue.trim()) return wardValue;
+  if (wardValue && typeof wardValue === "object") {
+    if (typeof wardValue.ward_name === "string" && wardValue.ward_name.trim()) return wardValue.ward_name;
+    if (typeof wardValue.name === "string" && wardValue.name.trim()) return wardValue.name;
+    if (wardValue.ward_number != null) return `Ward #${wardValue.ward_number}`;
+  }
+
+  return "Assigned Ward";
+};
+
 const ROLE_GRADIENT = {
   SUPER_ADMIN:    ["#0052CC", "#172B4D"],
   DISTRICT_ADMIN: ["#5B21B6", "#2D1B69"],
@@ -459,7 +472,7 @@ const InspectorComplaintItem = ({ complaint, index, total, onPress }) => {
   const priority = complaint.priority || "MEDIUM";
   const citizenName = complaint.user_id?.name || complaint.citizen_name || "Citizen";
   const createdDate = complaint.created_at ? new Date(complaint.created_at).toLocaleDateString() : "—";
-  const wardName = complaint.ward_id?.ward_name || complaint.ward_name || "Assigned Ward";
+  const wardName = getWardDisplayLabel(complaint);
   const address = complaint.address || "No address provided";
   const hasImages = complaint.images && complaint.images.length > 0;
 
