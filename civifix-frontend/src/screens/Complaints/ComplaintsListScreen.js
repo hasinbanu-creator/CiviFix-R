@@ -277,7 +277,7 @@ export const ComplaintsListScreen = ({ navigation }) => {
       ) : (
         <FlatList
           data={filtered}
-          keyExtractor={(item, index) => item?._id || item?.complaint_id || `complaint-${index}`}
+          keyExtractor={(item, index) => `${item?._id || item?.complaint_id || "c"}-${index}`}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           onEndReached={() => {

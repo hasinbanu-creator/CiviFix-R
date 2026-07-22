@@ -431,7 +431,7 @@ export const CreateComplaintScreen = ({ route, navigation }) => {
       const pickedImages = (result.assets || []).map((asset) => ({
         uri: asset.uri,
         name: asset.fileName || `photo-${Date.now()}.jpg`,
-        type: asset.type || "image/jpeg",
+        type: (asset.type === 'image' ? 'image/jpeg' : asset.type) || 'image/jpeg',
       }));
 
       setSelectedImages((prev) => [...prev, ...pickedImages].slice(0, 5));
@@ -479,8 +479,8 @@ export const CreateComplaintScreen = ({ route, navigation }) => {
 
     try {
       setLoading(true);
-      const uploadedImageUrls = await uploadImagesToServer();
-      const nextForm = { ...form, image_urls: uploadedImageUrls };
+      // Removed pre-upload. We pass raw images to preview screen.
+      const nextForm = { ...form, images: selectedImages };
 
       navigation.navigate("ComplaintPreview", {
         form: nextForm,
@@ -489,7 +489,7 @@ export const CreateComplaintScreen = ({ route, navigation }) => {
         selectedPri,
       });
     } catch {
-      setServerError("Unable to upload photos. Please try again.");
+      setServerError("Unable to proceed. Please try again.");
     } finally {
       setLoading(false);
     }

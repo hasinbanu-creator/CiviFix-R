@@ -127,9 +127,14 @@ export default function CreateComplaintPage() {
     setServerError("");
     try {
       const formData = new FormData();
-      Object.entries(form).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
+      formData.append("ward_id", form.ward_id);
+      formData.append("complaint_type", form.complaint_type);
+      formData.append("description", form.description);
+      formData.append("priority", form.priority);
+      formData.append("latitude", form.latitude);
+      formData.append("longitude", form.longitude);
+      if (form.address) formData.append("address", form.address);
+      if (form.citizen_note) formData.append("citizen_note", form.citizen_note.trim());
       
       selectedImages.forEach((file) => {
         formData.append("images", file);

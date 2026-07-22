@@ -525,7 +525,7 @@ export default function ComplaintDetailsPage() {
               </p>
               
               <div className="mb-8">
-                <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Proof Images (Optional)</label>
+                <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Proof Images (Required)</label>
                 <div className="border-2 border-dashed border-border rounded-2xl p-6 flex flex-col items-center justify-center bg-muted/20 hover:bg-muted/40 transition-colors relative cursor-pointer group">
                   <input 
                     type="file" 

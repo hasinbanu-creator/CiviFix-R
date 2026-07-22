@@ -115,7 +115,7 @@ const ComplaintMonitoringScreen = ({ navigation }) => {
       ) : (
         <FlatList
           data={complaints}
-          keyExtractor={(item) => item._id}
+          keyExtractor={(item, index) => `${item?._id || "a"}-${index}`}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchComplaints(1, true)} />}

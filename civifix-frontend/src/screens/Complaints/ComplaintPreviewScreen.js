@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Dimensions } from "react-native";
 import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
@@ -18,21 +19,32 @@ const ComplaintPreviewScreen = ({ route, navigation }) => {
     try {
       setSubmitting(true);
 
-      const payload = {
-        ward_id: form.ward_id,
-        complaint_type: form.complaint_type,
-        description: form.description,
-        priority: form.priority,
-        latitude: parseFloat(form.latitude),
-        longitude: parseFloat(form.longitude),
-        address: form.address,
-        citizen_note: form.citizen_note ? form.citizen_note.trim() : undefined,
-        image_urls: Array.isArray(form.image_urls) ? form.image_urls : [],
-      };
-
-      const created = await authService.createComplaint(payload);
+      const formData = new FormData();
+      formData.append("ward_id", String(form.ward_id));
+      formData.append("complaint_type", String(form.complaint_type));
+      formData.append("description", String(form.description));
+      formData.append("priority", String(form.priority));
+      formData.append("latitude", String(form.latitude));
+      formData.append("longitude", String(form.longitude));
+      if (form.address) formData.append("address", String(form.address));
+      if (form.citizen_note) formData.append("citizen_note", String(form.citizen_note).trim());
       
-      // Navigate to Success Screen
+      if (Array.isArray(form.images)) {
+        form.images.forEach((img, index) => {
+          let fileUri = img.uri;
+          if (Platform.OS === 'android' && !fileUri.startsWith('file://') && !fileUri.startsWith('content://')) {
+            fileUri = 'file://' + fileUri;
+          }
+          formData.append("images", {
+            uri: fileUri,
+            name: img.name || `photo-${index}.jpg`,
+            type: (img.type === 'image' ? 'image/jpeg' : img.type) || 'image/jpeg'
+          });
+        });
+      }
+
+      const created = await authService.createComplaint(formData);
+      
       navigation.replace("ComplaintSuccess", { complaint: created });
     } catch (err) {
       alert(getErrorMessage(err, "Unable to submit complaint."));
@@ -110,17 +122,16 @@ const ComplaintPreviewScreen = ({ route, navigation }) => {
         ) : null}
 
         {/* Uploaded Photos */}
-        {Array.isArray(form.image_urls) && form.image_urls.length > 0 ? (
+        {Array.isArray(form.images) && form.images.length > 0 ? (
           <View style={styles.card}>
             <View style={styles.row}>
               <Icon name="image-multiple-outline" size={20} color={COLORS.primary} />
               <Text style={styles.sectionTitle}>Attached Photos</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
-              {form.image_urls.map((img, idx) => {
-                const resolvedUri = resolveImageUri(img, API_URL);
-                return <Image key={`${img}-${idx}`} source={{ uri: resolvedUri }} style={styles.previewImage} />;
-              })}
+              {form.images.map((img, idx) => (
+                <Image key={`img-${idx}`} source={{ uri: img.uri }} style={styles.previewImage} />
+              ))}
             </ScrollView>
           </View>
         ) : null}

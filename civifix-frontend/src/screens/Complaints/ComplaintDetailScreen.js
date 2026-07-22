@@ -1,3 +1,4 @@
+
 import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -17,6 +18,7 @@ import authService from "../../services/authService";
 import { getErrorMessage } from "../../services/api";
 import { AuthContext } from "../../context/AuthContext";
 import { SPACING } from "../../constants/theme";
+import * as ImagePicker from "expo-image-picker";
 
 import { API_URL } from "../../constants/endpoints";
 import { resolveImageUri } from "../../utils/imageUri";
@@ -172,7 +174,7 @@ function HistoryItem({ item, complaint, isLast }) {
         {item.new_status && (item.new_status.toUpperCase() === "RESOLVED" || item.new_status.toUpperCase() === "CLOSED") && complaint?.proof_images?.length > 0 && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
             {complaint.proof_images.map((img, idx) => (
-              <Image key={idx} source={{ uri: resolveImageUri(img, API_URL) }} style={{ width: 80, height: 80, borderRadius: 8, marginRight: 8 }} />
+              <Image key={idx} source={{ uri: getFinalImageUri(img) }} style={{ width: 80, height: 80, borderRadius: 8, marginRight: 8 }} />
             ))}
           </ScrollView>
         )}
@@ -185,6 +187,21 @@ function HistoryItem({ item, complaint, isLast }) {
 }
 
 /* ── Main Screen ── */
+const getFinalImageUri = (img) => {
+    let finalUri = img;
+    if (img && typeof img === 'string' && !img.startsWith('http') && !img.startsWith('data:')) {
+      const base = API_URL ? API_URL.replace(/\/api\/v1\/?$/, '') : '';
+      // If the backend didn't include 'uploads/', we inject it.
+      let path = img.startsWith('/') ? img : '/' + img;
+      if (!path.startsWith('/uploads/')) {
+        path = '/uploads' + path;
+      }
+      finalUri = `${base}${path}`;
+    }
+    console.log(`[ComplaintDetailScreen] Image Source: ${img} -> Final URI: ${finalUri}`);
+    return finalUri;
+  };
+
 export const ComplaintDetailScreen = ({ route, navigation }) => {
   const initialComplaint = route.params?.complaint;
   const passedId = route.params?.complaintId;
@@ -201,6 +218,8 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
   const [feedback, setFeedback] = useState("");
   const [reopenReason, setReopenReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [selectedProofImages, setSelectedProofImages] = useState([]);
+  const [resolveNote, setResolveNote] = useState("");
 
   const { user } = useContext(AuthContext);
   const isCitizen = user?.role === "CITIZEN";
@@ -291,25 +310,85 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
     }
   };
 
+  const pickProofImages = async () => {
+    if (selectedProofImages.length >= 5) {
+      alert("You can attach up to 5 proof images.");
+      return;
+    }
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permission.status !== "granted") {
+      alert("Permission to access gallery is required!");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      selectionLimit: 5 - selectedProofImages.length,
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets) {
+      const newImages = result.assets.map((asset) => ({
+        uri: asset.uri,
+        name: asset.fileName || `proof-${Date.now()}.jpg`,
+        type: (asset.type === 'image' ? 'image/jpeg' : asset.type) || 'image/jpeg',
+      }));
+      setSelectedProofImages([...selectedProofImages, ...newImages].slice(0, 5));
+    }
+  };
+
+  const takeProofPhoto = async () => {
+    if (selectedProofImages.length >= 5) {
+      alert("You can attach up to 5 proof images.");
+      return;
+    }
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (permission.status !== "granted") {
+      alert("Permission to access camera is required!");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets) {
+      const asset = result.assets[0];
+      const newImage = {
+        uri: asset.uri,
+        name: asset.fileName || `proof-cam-${Date.now()}.jpg`,
+        type: (asset.type === 'image' ? 'image/jpeg' : asset.type) || 'image/jpeg',
+      };
+      setSelectedProofImages([...selectedProofImages, newImage].slice(0, 5));
+    }
+  };
+
   const handleResolve = async () => {
     try {
       setSubmitting(true);
-      const proofImages = Array.isArray(complaint?.image_urls) && complaint.image_urls.length > 0
-        ? complaint.image_urls
-        : Array.isArray(complaint?.proof_images) && complaint.proof_images.length > 0
-          ? complaint.proof_images
-          : [];
-
-      if (proofImages.length === 0) {
-        alert("Please attach at least one proof image before resolving this complaint.");
+      if (selectedProofImages.length === 0) {
+        alert("Please attach at least one proof image.");
+        setSubmitting(false);
         return;
       }
 
-      await authService.inspectorResolveComplaint(complaintId, {
-        proof_images: proofImages,
-        note: "Resolved by inspector after verification",
+      const formData = new FormData();
+      if (resolveNote.trim()) {
+        formData.append("note", resolveNote.trim());
+      }
+      
+      selectedProofImages.forEach((img, index) => {
+        let fileUri = img.uri;
+        if (Platform.OS === 'android' && !fileUri.startsWith('file://') && !fileUri.startsWith('content://')) {
+          fileUri = 'file://' + fileUri;
+        }
+        formData.append("images", {
+          uri: fileUri,
+          name: img.name || `proof-${index}.jpg`,
+          type: (img.type === 'image' ? 'image/jpeg' : img.type) || 'image/jpeg'
+        });
       });
-      alert("Complaint resolved!");
+
+      await authService.inspectorResolveComplaint(complaintId, formData);
+      alert("Complaint resolved successfully!");
       const data = await authService.getComplaint(complaintId);
       setComplaint(data);
     } catch (err) {
@@ -320,11 +399,26 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
   };
 
   const statusCfg = getStatus(complaint?.status);
-  const complaintImages = Array.isArray(complaint?.image_urls) && complaint.image_urls.length > 0
-    ? complaint.image_urls
-    : Array.isArray(complaint?.proof_images) && complaint.proof_images.length > 0
-      ? complaint.proof_images
-      : [];
+  // Extract citizen uploaded images or proof images
+  let complaintImages = [];
+  if (Array.isArray(complaint?.images) && complaint.images.length > 0) {
+    complaintImages = complaint.images;
+  } else if (Array.isArray(complaint?.image_urls) && complaint.image_urls.length > 0) {
+    complaintImages = complaint.image_urls;
+  } else if (Array.isArray(complaint?.proof_images) && complaint.proof_images.length > 0) {
+    complaintImages = complaint.proof_images;
+  }
+
+
+
+
+  useEffect(() => {
+    console.log("--- IMAGE LOGS ---");
+    console.log("complaint.images:", complaint?.images);
+    console.log("complaint.image_urls:", complaint?.image_urls);
+    console.log("complaint.proof_images:", complaint?.proof_images);
+  }, [complaint]);
+
 
   return (
     <View style={styles.flex}>
@@ -403,7 +497,7 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
                 <SectionTitle title="Attached Photos" icon="image-multiple-outline" />
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageRow}>
                   {complaintImages.map((img, idx) => (
-                    <Image key={`${img}-${idx}`} source={{ uri: resolveImageUri(img, API_URL) }} style={styles.previewImage} />
+                    <Image key={`${img}-${idx}`} source={{ uri: getFinalImageUri(img) }} style={styles.previewImage} />
                   ))}
                 </ScrollView>
               </>
@@ -496,9 +590,50 @@ export const ComplaintDetailScreen = ({ route, navigation }) => {
                 </View>
               )}
               {["in_progress", "working"].includes(complaint.status?.toLowerCase()) && (
-                <TouchableOpacity style={[styles.actionBtn, { backgroundColor: "#059669" }]} onPress={handleResolve} disabled={submitting}>
-                  {submitting ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.actionBtnText}>Resolve</Text>}
-                </TouchableOpacity>
+                <View style={{ marginTop: 10 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '700', marginBottom: 10, color: '#333' }}>Attach Proof (Required)</Text>
+                  
+                  <View style={{ flexDirection: "row", gap: 10, marginBottom: 15 }}>
+                    <TouchableOpacity style={[styles.actionBtn, { flex: 1, backgroundColor: '#0284c7' }]} onPress={takeProofPhoto}>
+                      <Text style={styles.actionBtnText}>Camera</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.actionBtn, { flex: 1, backgroundColor: '#4f46e5' }]} onPress={pickProofImages}>
+                      <Text style={styles.actionBtnText}>Gallery</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {selectedProofImages.length > 0 && (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 15 }}>
+                      {selectedProofImages.map((img, idx) => (
+                        <View key={`proof-${idx}`} style={{ position: 'relative', marginRight: 10 }}>
+                          <Image source={{ uri: img.uri }} style={{ width: 80, height: 80, borderRadius: 8 }} />
+                          <TouchableOpacity
+                            style={{ position: 'absolute', top: -5, right: -5, backgroundColor: 'red', borderRadius: 12, width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}
+                            onPress={() => setSelectedProofImages(prev => prev.filter((_, i) => i !== idx))}
+                          >
+                            <Icon name="close" size={16} color="white" />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </ScrollView>
+                  )}
+
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="Resolution notes (optional)"
+                    value={resolveNote}
+                    onChangeText={setResolveNote}
+                    multiline
+                  />
+
+                  <TouchableOpacity 
+                    style={[styles.actionBtn, { backgroundColor: selectedProofImages.length > 0 ? "#059669" : "#a1a1aa", marginTop: 10 }]} 
+                    onPress={handleResolve} 
+                    disabled={submitting || selectedProofImages.length === 0}
+                  >
+                    {submitting ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.actionBtnText}>Submit & Resolve</Text>}
+                  </TouchableOpacity>
+                </View>
               )}
               {["resolved", "closed", "rejected"].includes(complaint.status?.toLowerCase()) && (
                 <Text style={{ color: GRAY_500, fontSize: 14, textAlign: "center", fontStyle: "italic" }}>No actions available.</Text>

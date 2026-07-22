@@ -1,6 +1,6 @@
 import api from "./api";
 import { unwrapResponse } from "./api";
-import { ENDPOINTS } from "../constants/endpoints";
+import { API_URL, ENDPOINTS } from "../constants/endpoints";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const storeSession = async (session) => {
@@ -90,8 +90,51 @@ export const authService = {
   },
 
   createComplaint: async (complaintData) => {
-    const response = await api.post(ENDPOINTS.CREATE_COMPLAINT, complaintData);
-    return unwrapResponse(response);
+    console.log("========== TRACE: createComplaint ==========");
+    console.log("1. Entered authService.createComplaint()");
+    const url = `${api.defaults.baseURL}${ENDPOINTS.CREATE_COMPLAINT}`;
+    console.log("2. URL computed:", url);
+    
+    const token = await AsyncStorage.getItem("authToken");
+    const maskedToken = token ? `${token.substring(0, 4)}...${token.substring(token.length - 4)}` : "null";
+    console.log("3. Authorization header: Bearer", maskedToken);
+    
+    console.log("4. Validating FormData...");
+    if (complaintData && complaintData._parts) {
+      console.log("   - FormData keys:", complaintData._parts.map(p => p[0]));
+      const images = complaintData._parts.filter(p => p[0] === 'images');
+      images.forEach((img, i) => {
+        console.log(`   - Image ${i + 1} URI:`, img[1]?.uri);
+        console.log(`   - Image ${i + 1} MIME type:`, img[1]?.type);
+      });
+    }
+
+    try {
+      console.log("5. Calling fetch()...");
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+          // CRITICAL: Do NOT set Content-Type manually for FormData in React Native fetch!
+        },
+        body: complaintData
+      });
+      console.log("6. fetch() completed without crashing!");
+      console.log("7. Response status:", response.status);
+      
+      const responseData = await response.json();
+      if (!response.ok) {
+        console.error("8. Server returned error:", responseData);
+        throw new Error(responseData.message || "Failed to create complaint");
+      }
+      return responseData;
+    } catch (err) {
+      console.error("6. fetch() or execution crashed before returning a response!");
+      console.error("   -> Error:", err.message);
+      console.error("   -> Stack Trace:", err.stack);
+      throw err;
+    }
   },
 
   getToken: async () => {
@@ -274,12 +317,52 @@ export const authService = {
     return unwrapResponse(res);
   },
 
-  inspectorResolveComplaint: async (complaintId, payload = {}) => {
-    const res = await api.put(`/inspector/complaints/${complaintId}/resolve`, {
-      proof_images: payload.proof_images || [],
-      note: payload.note || undefined,
-    });
-    return unwrapResponse(res);
+  inspectorResolveComplaint: async (complaintId, payload) => {
+    console.log("========== TRACE: inspectorResolveComplaint ==========");
+    console.log("1. Entered authService.inspectorResolveComplaint()");
+    const url = `${api.defaults.baseURL}/inspector/complaints/${complaintId}/resolve`;
+    console.log("2. URL computed:", url);
+    
+    const token = await AsyncStorage.getItem("authToken");
+    const maskedToken = token ? `${token.substring(0, 4)}...${token.substring(token.length - 4)}` : "null";
+    console.log("3. Authorization header: Bearer", maskedToken);
+    
+    console.log("4. Validating FormData...");
+    if (payload && payload._parts) {
+      console.log("   - FormData keys:", payload._parts.map(p => p[0]));
+      const images = payload._parts.filter(p => p[0] === 'images');
+      images.forEach((img, i) => {
+        console.log(`   - Image ${i + 1} URI:`, img[1]?.uri);
+        console.log(`   - Image ${i + 1} MIME type:`, img[1]?.type);
+      });
+    }
+
+    try {
+      console.log("5. Calling fetch()...");
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+          // Do NOT set Content-Type manually
+        },
+        body: payload
+      });
+      console.log("6. fetch() completed without crashing!");
+      console.log("7. Response status:", response.status);
+      
+      const responseData = await response.json();
+      if (!response.ok) {
+        console.error("8. Server returned error:", responseData);
+        throw new Error(responseData.message || "Failed to resolve complaint");
+      }
+      return responseData;
+    } catch (err) {
+      console.error("6. fetch() or execution crashed before returning a response!");
+      console.error("   -> Error:", err.message);
+      console.error("   -> Stack Trace:", err.stack);
+      throw err;
+    }
   },
 };
 
