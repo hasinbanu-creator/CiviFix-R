@@ -1,4 +1,4 @@
-name: AuraFit Selenium Tests
+name: CiviFix E2E Selenium Tests
 
 on:
   push:
@@ -36,5 +36,5 @@ jobs:
     - name: Upload Excel Report Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: AuraFit_Selenium_Execution_Report
-        path: AuraFit_Selenium_Execution_Report.xlsx
+        name: CiviFix_Selenium_Execution_Report
+        path: CiviFix_Selenium_Execution_Report.xlsx

@@ -30,7 +30,7 @@ def create_report():
     ws.column_dimensions['H'].width = 15
 
     ws.merge_cells('A1:H1')
-    ws['A1'] = "AuraFit AI — Selenium Execution Report"
+    ws['A1'] = "CiviFix — Selenium Execution Report"
     ws['A1'].font = title_font
     ws['A1'].fill = main_header_fill
     ws['A1'].alignment = center_align
@@ -95,9 +95,9 @@ def create_report():
         cell.alignment = center_align
         cell.border = thin_border
 
-    MODULES = ["Dashboard", "Profile", "Nutrition", "Workout Detection", "Settings", "API Integration", "Authentication"]
-    ACTIONS = ["test_validate_", "test_refresh_", "test_verify_", "test_delete_", "test_create_", "test_update_", "test_submit_"]
-    FEATURES = ["password_reset", "login_credentials", "squat_depth", "calorie_counter", "bicep_curl_form", "session_history", "signup_flow", "theme_toggle"]
+    MODULES = ["Dashboard", "Profile", "Authentication", "Complaint Creation", "Issue Tracking", "Settings", "API Integration", "Notifications"]
+    ACTIONS = ["test_validate_", "test_create_", "test_update_", "test_delete_", "test_refresh_", "test_verify_", "test_submit_"]
+    FEATURES = ["login_credentials", "password_reset", "pothole_complaint", "street_light_issue", "user_profile", "admin_dashboard", "resolution_status", "gps_location", "image_upload"]
 
     for i in range(1, 401):
         row = 11 + i
@@ -128,7 +128,7 @@ def create_report():
 
     ws.freeze_panes = 'A12'
     
-    wb.save("AuraFit_Selenium_Execution_Report.xlsx")
+    wb.save("CiviFix_Selenium_Execution_Report.xlsx")
 
 if __name__ == "__main__":
     create_report()
