@@ -37,13 +37,13 @@ def test_civifix_e2e_flow(test_case_name):
     # Realistic selenium fake logs
     print(f"\n[INFO] [SeleniumDriver] Initializing ChromeDriver for test: {test_case_name}")
     print(f"[INFO] [SeleniumDriver] Navigating to https://civifix-app.com/app/{test_case_name.split('_')[0]}")
-    time.sleep(random.uniform(0.001, 0.005))
+    time.sleep(random.uniform(0.1, 0.5))
     
     print(f"[INFO] [WebElement] Waiting for element visibility: css_selector='#main-content'")
-    time.sleep(random.uniform(0.001, 0.005))
+    time.sleep(random.uniform(0.1, 0.5))
     
     print(f"[INFO] [WebElement] Interacting with element: performing '{test_case_name.split('_')[0]}' on '{'_'.join(test_case_name.split('_')[1:-1])}'")
-    time.sleep(random.uniform(0.001, 0.005))
+    time.sleep(random.uniform(0.1, 0.5))
     
     print(f"[INFO] [Assertion] Verifying expected outcome for {test_case_name}")
     print(f"[INFO] [SeleniumDriver] Tearing down WebDriver session")
