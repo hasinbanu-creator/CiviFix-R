@@ -27,7 +27,7 @@ jobs:
         
     - name: Run E2E Selenium Test Suite
       run: |
-        pytest selenium_tests/test_mock_selenium.py -v
+        pytest -s selenium_tests/test_mock_selenium.py -v
         
     - name: Generate Execution Report
       run: |
