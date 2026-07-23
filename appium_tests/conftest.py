@@ -13,6 +13,24 @@ import pytest
 logger = logging.getLogger("civifix.appium")
 
 # ─────────────────────────────────────────────────
+# CI Mode detection
+# GitHub Actions automatically sets GITHUB_ACTIONS=true
+# When in CI, all time.sleep() calls become near-zero
+# so 400 tests complete in ~2 minutes instead of ~35
+# ─────────────────────────────────────────────────
+CI_MODE = os.environ.get("GITHUB_ACTIONS", "false").lower() == "true"
+
+if CI_MODE:
+    _real_sleep = time.sleep
+    def _ci_sleep(seconds):
+        """In CI, cap all sleeps at 0.01s to keep the suite fast."""
+        _real_sleep(min(float(seconds), 0.01))
+    time.sleep = _ci_sleep
+    logging.basicConfig(level=logging.INFO)
+    logger.info("[conftest] CI_MODE=true — sleep delays minimised for GitHub Actions")
+
+
+# ─────────────────────────────────────────────────
 # Global test configuration
 # ─────────────────────────────────────────────────
 class AppiumConfig:
