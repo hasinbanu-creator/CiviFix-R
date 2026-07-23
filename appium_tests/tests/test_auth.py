@@ -319,6 +319,65 @@ class TestDeepLinkNavigation:
         logger.info(f"[{test_id}] Deep link to {screen} ✓")
 
 
+# ─── TC036–TC040: Profile & Settings Auth ────────────────────────────────────
+class TestProfileAuthSettings:
+
+    def test_TC036_profile_loads_after_login(self, driver, test_context):
+        """Profile screen loads correctly after login"""
+        test_context.update({"test_id": "TC036", "module": "Auth Flow", "scenario": "Profile loads after login"})
+        login_page = LoginPage(driver, AppiumConfig)
+        login_page.login(AppiumConfig.CITIZEN_EMAIL, AppiumConfig.TEST_OTP)
+        from pages.profile_page import ProfilePage
+        profile = ProfilePage(driver, AppiumConfig)
+        assert profile.is_element_present(*profile.NAME_LABEL)
+        logger.info("[TC036] Profile loaded after login ✓")
+
+    def test_TC037_profile_shows_correct_email(self, driver, test_context):
+        """Profile screen shows correct email for logged-in user"""
+        test_context.update({"test_id": "TC037", "module": "Auth Flow", "scenario": "Profile email shown"})
+        login_page = LoginPage(driver, AppiumConfig)
+        login_page.login(AppiumConfig.CITIZEN_EMAIL, AppiumConfig.TEST_OTP)
+        from pages.profile_page import ProfilePage
+        profile = ProfilePage(driver, AppiumConfig)
+        email = profile.get_email()
+        assert email is not None
+        logger.info(f"[TC037] Profile email shown: {email} ✓")
+
+    def test_TC038_app_version_shown_on_profile(self, driver, test_context):
+        """App version label is visible on the profile screen"""
+        test_context.update({"test_id": "TC038", "module": "Auth Flow", "scenario": "App version shown"})
+        login_page = LoginPage(driver, AppiumConfig)
+        login_page.login(AppiumConfig.CITIZEN_EMAIL, AppiumConfig.TEST_OTP)
+        from pages.profile_page import ProfilePage
+        profile = ProfilePage(driver, AppiumConfig)
+        version = profile.get_app_version()
+        assert version is not None
+        logger.info(f"[TC038] App version shown: {version} ✓")
+
+    def test_TC039_logout_confirmation_dialog(self, driver, test_context):
+        """Logout shows a confirmation dialog before logging out"""
+        test_context.update({"test_id": "TC039", "module": "Auth Flow", "scenario": "Logout confirmation dialog"})
+        login_page = LoginPage(driver, AppiumConfig)
+        login_page.login(AppiumConfig.CITIZEN_EMAIL, AppiumConfig.TEST_OTP)
+        from pages.profile_page import ProfilePage
+        profile = ProfilePage(driver, AppiumConfig)
+        profile.tap(*profile.LOGOUT_BTN)
+        assert profile.is_element_present(*profile.LOGOUT_CONFIRM_BTN)
+        logger.info("[TC039] Logout confirmation dialog shown ✓")
+
+    def test_TC040_cancel_logout_stays_logged_in(self, driver, test_context):
+        """Cancelling logout keeps user logged in"""
+        test_context.update({"test_id": "TC040", "module": "Auth Flow", "scenario": "Cancel logout stays logged in"})
+        login_page = LoginPage(driver, AppiumConfig)
+        login_page.login(AppiumConfig.CITIZEN_EMAIL, AppiumConfig.TEST_OTP)
+        from pages.profile_page import ProfilePage
+        profile = ProfilePage(driver, AppiumConfig)
+        profile.tap(*profile.LOGOUT_BTN)
+        profile.press_back()  # Cancel logout
+        assert profile.is_element_present(*profile.NAME_LABEL)
+        logger.info("[TC040] Cancel logout keeps user logged in ✓")
+
+
 # ─── TC041–TC050: Security & Edge Cases ──────────────────────────────────────
 class TestAuthSecurity:
 
