@@ -30,7 +30,7 @@ def create_report():
     ws.column_dimensions['H'].width = 15
 
     ws.merge_cells('A1:H1')
-    ws['A1'] = "CiviFix — Selenium Execution Report"
+    ws['A1'] = "CiviFix E2E Selenium Tests"
     ws['A1'].font = title_font
     ws['A1'].fill = main_header_fill
     ws['A1'].alignment = center_align
