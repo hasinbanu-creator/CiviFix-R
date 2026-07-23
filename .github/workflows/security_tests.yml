@@ -1,4 +1,4 @@
-name: "🛡️ CiviFix Mobile Vulnerability Testing"
+name: "Vulnerability Testing Workflow"
 
 on:
   push:
