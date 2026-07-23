@@ -11,6 +11,17 @@ export const complaintsApi = {
     return unwrapResponse(res);
   },
 
+  
+  submitFeedback: async (id: string, data: any) => {
+    const response = await api.put(ENDPOINTS.SUBMIT_FEEDBACK(id), null, { params: data });
+    return response.data;
+  },
+
+  reopenComplaint: async (id: string, reason: string) => {
+    const response = await api.put(ENDPOINTS.REOPEN_COMPLAINT(id), null, { params: { reason } });
+    return response.data;
+  },
+
   resolveComplaintWithImages: async (id: string, formData: FormData) => {
     const res = await api.put(`/inspector/complaints/${id}/resolve`, formData);
     return unwrapResponse(res);

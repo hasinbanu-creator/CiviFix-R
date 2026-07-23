@@ -27,7 +27,7 @@ import {
   User
 } from "lucide-react";
 import { useComplaints } from "@/hooks/use-complaints";
-import { useInspectorDashboard, useAdminDashboard } from "@/hooks/use-dashboard";
+import { useInspectorDashboard, useAdminDashboard, useWorkerDashboard } from "@/hooks/use-dashboard";
 
 // --- Types ---
 type ComplaintStatus = "OPEN" | "WORKING" | "APPROVAL" | "CLOSED" | "REJECTED";
@@ -110,7 +110,7 @@ function ComplaintItem({ complaint, index, total }: any) {
 
   return (
     <Link 
-      href={`/complaints/${complaint._id || complaint.complaint_id}`}
+      href={`/complaints/${complaint.id || complaint._id || complaint.complaint_id}`}
       className={`flex items-start p-5 hover:bg-muted/50 transition-colors duration-200 ${index !== total - 1 ? 'border-b border-border/50' : ''}`}
     >
       <div className={`w-12 h-12 rounded-xl ${meta.bg} flex items-center justify-center mr-4 shrink-0 mt-1 shadow-sm`}>
@@ -512,7 +512,7 @@ function InspectorDashboard() {
                     const typeMeta = TYPE_META[(c.complaint_type as ComplaintType)] || TYPE_META.OTHER;
                     
                     return (
-                      <tr key={c._id || c.complaint_id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                      <tr key={c.id || c._id || c.complaint_id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
                         <td className="p-5">
                           <p className="text-sm font-black text-slate-700">{c.complaint_id || "#CIV-NEW"}</p>
                           <p className="text-xs font-medium text-slate-500 mt-0.5">{c.citizen?.name || "Citizen"}</p>
@@ -544,7 +544,7 @@ function InspectorDashboard() {
                           </span>
                         </td>
                         <td className="p-5 text-right">
-                          <Link href={`/complaints/${c._id || c.complaint_id}`} className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 text-slate-600 hover:bg-teal-100 hover:text-teal-700 transition-colors">
+                          <Link href={`/complaints/${c.id || c._id || c.complaint_id}`} className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 text-slate-600 hover:bg-teal-100 hover:text-teal-700 transition-colors">
                             <ChevronRight className="w-5 h-5" />
                           </Link>
                         </td>
@@ -585,12 +585,98 @@ function AdminDashboard() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 md:px-0">
+      <SectionTitle left="Quick Actions" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+        <QuickActionBtn icon={Building2} title="Create\nDistrict" colorClass="text-primary" bgClass="bg-primary/10" href="/settings/district/create" />
+        <QuickActionBtn icon={Users} title="Create\nInspector" colorClass="text-[#7C3AED]" bgClass="bg-[#7C3AED]/10" href="/settings/inspector/create" />
+        <QuickActionBtn icon={Wrench} title="Create\nWorker" colorClass="text-[#059669]" bgClass="bg-[#059669]/10" href="/settings/worker/create" />
+        <QuickActionBtn icon={FileText} title="Reports" colorClass="text-accent" bgClass="bg-accent/10" href="/reports" />
+      </div>
+
       <SectionTitle left="District Overview" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <MetricCard icon={Map} value={data.stats?.total_wards || 0} label="Wards" colorClass="text-primary" bgClass="bg-primary/10" />
         <MetricCard icon={Users} value={data.stats?.total_inspectors || 0} label="Inspectors" colorClass="text-secondary" bgClass="bg-secondary/10" />
         <MetricCard icon={FileText} value={data.stats?.total_complaints || 0} label="Complaints" colorClass="text-accent" bgClass="bg-accent/10" />
         <MetricCard icon={CheckCircle2} value={data.stats?.resolved_complaints || 0} label="Resolved" colorClass="text-success" bgClass="bg-success/10" />
+      </div>
+    </div>
+  );
+}
+
+function WorkerDashboard() {
+  const { data, isLoading: loading } = useWorkerDashboard();
+  const dashboard = data?.data || data || null;
+  
+  const tasks = dashboard?.assigned_tasks || {};
+  const assignments = dashboard?.recent_assignments || [];
+  const completionRate = dashboard?.completion_rate || 0;
+
+  const stats = {
+    total: tasks.total || 0,
+    pending: tasks.pending || 0,
+    completed: tasks.completed || 0,
+  };
+
+  return (
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-8 mt-[-3rem] relative z-10 mx-4 md:mx-0 flex flex-wrap items-center justify-between">
+        <div className="flex-1 text-center py-2 px-2 border-r border-slate-100">
+          <p className="text-3xl font-black text-slate-800">{stats.total}</p>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Total</p>
+        </div>
+        <div className="flex-1 text-center py-2 px-2 border-r border-slate-100">
+          <p className="text-3xl font-black text-[#D97706]">{stats.pending}</p>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Pending</p>
+        </div>
+        <div className="flex-1 text-center py-2 px-2">
+          <p className="text-3xl font-black text-[#059669]">{stats.completed}</p>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Done</p>
+        </div>
+      </div>
+
+      <div className="px-4 md:px-0">
+        <SectionTitle left="My Tasks" />
+        <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
+          <MetricCard icon={ClipboardList} value={stats.total} label="Assigned" colorClass="text-primary" bgClass="bg-primary/10" />
+          <MetricCard icon={Wrench} value={stats.pending} label="Pending" colorClass="text-[#D97706]" bgClass="bg-[#FEF3C7]" />
+          <MetricCard icon={CheckCircle2} value={stats.completed} label="Completed" colorClass="text-[#059669]" bgClass="bg-[#D1FAE5]" />
+        </div>
+
+        {completionRate > 0 && (
+          <>
+            <SectionTitle left="Performance" />
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-sm font-semibold text-muted-foreground">Completion Rate</span>
+                <span className="text-xl font-bold text-primary">{completionRate}%</span>
+              </div>
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                <div style={{ width: `${completionRate}%` }} className="h-full bg-primary transition-all duration-1000"></div>
+              </div>
+            </div>
+          </>
+        )}
+
+        <SectionTitle left="Recent Assignments" right="View All" rightHref="/complaints" />
+        <div className="bg-card border border-border rounded-3xl shadow-sm overflow-hidden mb-8">
+          {loading ? (
+             <div className="p-10 flex justify-center">
+               <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+             </div>
+          ) : assignments.length === 0 ? (
+             <div className="p-10 text-center flex flex-col items-center">
+               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <ClipboardList className="w-8 h-8 text-muted-foreground" />
+               </div>
+               <p className="text-base font-bold text-foreground">No tasks assigned</p>
+             </div>
+          ) : (
+            assignments.map((c: any, i: number) => (
+              <ComplaintItem key={c._id || c.id || c.complaint_id} complaint={c} index={i} total={assignments.length} />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
@@ -643,7 +729,8 @@ export default function DashboardPage() {
       {/* Role-based Dashboard Content */}
       <div className="max-w-7xl mx-auto w-full md:px-12">
         {role === "CITIZEN" && <CitizenDashboard />}
-        {(role === "INSPECTOR" || role === "WORKER") && <InspectorDashboard />}
+        {role === "INSPECTOR" && <InspectorDashboard />}
+        {role === "WORKER" && <WorkerDashboard />}
         {(role === "SUPER_ADMIN" || role === "DISTRICT_ADMIN") && <AdminDashboard />}
       </div>
     </div>

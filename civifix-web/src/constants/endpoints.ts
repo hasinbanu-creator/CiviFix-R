@@ -17,6 +17,8 @@ export const ENDPOINTS = {
   GET_COMPLAINTS: "/complaints/my/dashboard",
   CREATE_COMPLAINT: "/complaints",
   GET_COMPLAINT: (id: string | number) => `/complaints/${id}`,
+  SUBMIT_FEEDBACK: (id: string | number) => `/complaints/${id}/feedback`,
+  REOPEN_COMPLAINT: (id: string | number) => `/complaints/${id}/reopen`,
 
   // Ward/admin endpoints
   GET_WARDS_BY_DISTRICT: (districtId: string | number) => `/wards/district/${districtId}`,

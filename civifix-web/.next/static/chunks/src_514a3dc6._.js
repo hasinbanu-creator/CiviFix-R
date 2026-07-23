@@ -11,7 +11,7 @@ __turbopack_context__.s([
     ()=>__TURBOPACK__default__export__
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = /*#__PURE__*/ __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
-const API_URL = ("TURBOPACK compile-time value", "http://localhost:8000/api/v1") || "http://34.14.168.135:8000/api/v1";
+const API_URL = ("TURBOPACK compile-time value", "https://cv.onenism.org/api/v1") || "http://34.14.168.135:8000/api/v1";
 const ENDPOINTS = {
     // Auth endpoints
     LOGIN: "/auth/login",
@@ -27,6 +27,8 @@ const ENDPOINTS = {
     GET_COMPLAINTS: "/complaints/my/dashboard",
     CREATE_COMPLAINT: "/complaints",
     GET_COMPLAINT: (id)=>"/complaints/".concat(id),
+    SUBMIT_FEEDBACK: (id)=>"/complaints/".concat(id, "/feedback"),
+    REOPEN_COMPLAINT: (id)=>"/complaints/".concat(id, "/reopen"),
     // Ward/admin endpoints
     GET_WARDS_BY_DISTRICT: (districtId)=>"/wards/district/".concat(districtId),
     SEARCH_WARDS: (districtId)=>"/wards/search/".concat(districtId),

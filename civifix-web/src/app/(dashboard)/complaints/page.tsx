@@ -311,7 +311,7 @@ export default function ComplaintsListPage() {
                         const IconType = meta.icon;
                         
                         return (
-                          <tr key={complaint._id} className="hover:bg-muted/30 transition-colors group cursor-pointer" onClick={() => window.location.href=`/complaints/${complaint._id || complaint.complaint_id}`}>
+                          <tr key={complaint._id} className="hover:bg-muted/30 transition-colors group cursor-pointer" onClick={() => window.location.href=`/complaints/${complaint.id || complaint._id || complaint.complaint_id}`}>
                             <td className="p-4 pl-6 text-sm font-bold text-foreground">
                               {complaint.complaint_id || complaint._id?.substring(0,6).toUpperCase()}
                             </td>
@@ -369,7 +369,7 @@ export default function ComplaintsListPage() {
                   return (
                     <Link
                       key={complaint._id}
-                      href={`/complaints/${complaint._id || complaint.complaint_id}`}
+                      href={`/complaints/${complaint.id || complaint._id || complaint.complaint_id}`}
                       className="block bg-card rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-border group relative overflow-hidden hover:-translate-y-1"
                     >
                       <div className="flex items-start gap-4">

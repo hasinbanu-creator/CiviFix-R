@@ -21,3 +21,10 @@ export function useAdminStats() {
     queryFn: () => authService.getAdminStats(),
   });
 }
+
+export function useWorkerDashboard() {
+  return useQuery({
+    queryKey: ["worker-dashboard"],
+    queryFn: () => authService.getWorkerDashboard(),
+  });
+}

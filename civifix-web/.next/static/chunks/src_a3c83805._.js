@@ -878,7 +878,7 @@ function ComplaintsListPage() {
                                                             const IconType = meta.icon;
                                                             return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
                                                                 className: "hover:bg-muted/30 transition-colors group cursor-pointer",
-                                                                onClick: ()=>window.location.href = "/complaints/".concat(complaint._id || complaint.complaint_id),
+                                                                onClick: ()=>window.location.href = "/complaints/".concat(complaint.id || complaint._id || complaint.complaint_id),
                                                                 children: [
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
                                                                         className: "p-4 pl-6 text-sm font-bold text-foreground",
@@ -1062,7 +1062,7 @@ function ComplaintsListPage() {
                                         const statusStyle = STATUS_STYLES[complaint.status] || STATUS_STYLES.OPEN;
                                         const IconType = meta.icon;
                                         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                            href: "/complaints/".concat(complaint._id || complaint.complaint_id),
+                                            href: "/complaints/".concat(complaint.id || complaint._id || complaint.complaint_id),
                                             className: "block bg-card rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-border group relative overflow-hidden hover:-translate-y-1",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "flex items-start gap-4",

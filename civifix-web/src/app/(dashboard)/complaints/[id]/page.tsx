@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { API_URL } from "@/constants/endpoints";
 import authService from "@/services/auth";
 import { useParams, useRouter } from "next/navigation";
 import { useComplaint } from "@/hooks/use-complaints";
@@ -98,6 +99,21 @@ function NoteCard({ icon: Icon, label, value, colorClass, borderClass, bgClass }
   );
 }
 
+
+const getFinalImageUri = (img: string) => {
+  let finalUri = img;
+  if (img && typeof img === 'string' && !img.startsWith('http') && !img.startsWith('data:')) {
+    const base = API_URL ? API_URL.replace(/\/api\/v1\/?$/, '') : '';
+    // If the backend didn't include 'uploads/', we inject it.
+    let path = img.startsWith('/') ? img : '/' + img;
+    if (!path.startsWith('/uploads/')) {
+      path = '/uploads' + path;
+    }
+    finalUri = `${base}${path}`;
+  }
+  return finalUri;
+};
+
 export default function ComplaintDetailsPage() {
   const { user } = useAuth();
   const isPrivileged = user?.role === "INSPECTOR" || user?.role === "WORKER" || user?.role === "SUPER_ADMIN" || user?.role === "DISTRICT_ADMIN";
@@ -110,6 +126,17 @@ export default function ComplaintDetailsPage() {
   const complaint: any = data;
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    if (complaint) {
+      console.log("--- DEBUG LOGS ---");
+      console.log("Complaint Response:", complaint);
+      console.log("complaint.images:", complaint.images);
+      console.log("complaint.image_urls:", complaint.image_urls);
+      console.log("complaint.proof_images:", complaint.proof_images);
+    }
+  }, [complaint]);
+
+
   const [updating, setUpdating] = useState(false);
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -117,6 +144,10 @@ export default function ComplaintDetailsPage() {
   const [newNote, setNewNote] = useState("");
   const [selectedProofImages, setSelectedProofImages] = useState<File[]>([]);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+
+  const [rating, setRating] = useState(0);
+  const [feedback, setFeedback] = useState("");
+  const [reopenReason, setReopenReason] = useState("");
 
   const updateStatus = async (newStatus: string) => {
     try {
@@ -131,7 +162,7 @@ export default function ComplaintDetailsPage() {
     }
   };
 
-  const handleStartWork = async () => {
+  const handleAccept = async () => {
     try {
       setUpdating(true);
       await authService.inspectorStartWork(id);
@@ -140,7 +171,35 @@ export default function ComplaintDetailsPage() {
       queryClient.invalidateQueries({ queryKey: ["complaints"] });
     } catch (e) {
       console.error(e);
-      alert("Failed to start work");
+      alert("Failed to accept complaint");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (rating === 0) return alert("Please select a rating");
+    try {
+      setUpdating(true);
+      await complaintsApi.submitFeedback(id, { rating, feedback });
+      alert("Feedback submitted successfully!");
+      refetch();
+    } catch (e: any) {
+      alert("Failed to submit feedback");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleReopen = async () => {
+    if (!reopenReason.trim()) return alert("Please provide a reason to reopen");
+    try {
+      setUpdating(true);
+      await complaintsApi.reopenComplaint(id, reopenReason);
+      alert("Complaint reopened successfully!");
+      refetch();
+    } catch (e: any) {
+      alert("Failed to reopen complaint");
     } finally {
       setUpdating(false);
     }
@@ -226,6 +285,9 @@ export default function ComplaintDetailsPage() {
     );
   }
 
+
+
+
   const typeMeta = TYPE_META[complaint.complaint_type] || TYPE_META.OTHER;
   const statusCfg = STATUS_CONFIG[complaint.status] || STATUS_CONFIG.PENDING;
   const priorityCfg = PRIORITY_CONFIG[complaint.priority] || PRIORITY_CONFIG.MEDIUM;
@@ -303,22 +365,40 @@ export default function ComplaintDetailsPage() {
             value={complaint.latitude && complaint.longitude ? `${complaint.latitude}, ${complaint.longitude}` : null} 
           />
 
-          {complaint.image_urls && complaint.image_urls.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-border/50">
-              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4">Attached Images</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {complaint.image_urls.map((url: string, index: number) => (
-                  <div 
-                    key={index} 
-                    className="relative aspect-square rounded-2xl overflow-hidden border border-border shadow-sm cursor-pointer group"
-                    onClick={() => setSelectedImagePreview(url)}
-                  >
-                    <img src={url} alt={`Complaint ${index+1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          {(() => {
+            let complaintImages: string[] = [];
+            if (Array.isArray(complaint.images) && complaint.images.length > 0) {
+              complaintImages = complaint.images;
+            } else if (Array.isArray(complaint.image_urls) && complaint.image_urls.length > 0) {
+              complaintImages = complaint.image_urls;
+            } else if (Array.isArray(complaint.proof_images) && complaint.proof_images.length > 0) {
+              complaintImages = complaint.proof_images;
+            }
+
+            if (complaintImages.length > 0) {
+              return (
+                <div className="mt-8 pt-6 border-t border-border/50">
+                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4">Attached Photos</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {complaintImages.map((url: string, index: number) => {
+                      const finalUrl = getFinalImageUri(url);
+                      console.log(`[Web] Rendering Image: ${url} -> ${finalUrl}`);
+                      return (
+                        <div 
+                          key={index} 
+                          className="relative aspect-square rounded-2xl overflow-hidden border border-border shadow-sm cursor-pointer group"
+                          onClick={() => setSelectedImagePreview(finalUrl)}
+                        >
+                          <img src={finalUrl} alt={`Complaint ${index+1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              );
+            }
+            return null;
+          })()}
 
           {(complaint.citizen_note || complaint.worker_note || complaint.inspector_note || complaint.rejection_reason) && (
             <>
@@ -421,10 +501,10 @@ export default function ComplaintDetailsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     disabled={updating}
-                    onClick={handleStartWork}
-                    className="flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl py-4 text-sm font-bold shadow-md shadow-teal-600/20 disabled:opacity-50 transition-all hover:-translate-y-0.5"
+                    onClick={handleAccept}
+                    className="flex items-center justify-center gap-2 bg-[#059669] hover:bg-emerald-700 text-white rounded-2xl py-4 text-sm font-bold shadow-md shadow-emerald-600/20 disabled:opacity-50 transition-all hover:-translate-y-0.5"
                   >
-                    <Play className="w-5 h-5" /> Start Work
+                    <Play className="w-5 h-5" /> Accept
                   </button>
                   <button
                     disabled={updating}
@@ -456,6 +536,64 @@ export default function ComplaintDetailsPage() {
               </div>
             )}
           </>
+        )}
+
+        {/* Citizen Actions — Feedback & Reopen */}
+        {user?.role === "CITIZEN" && ["CLOSED", "RESOLVED"].includes(complaint.status) && (
+          <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 mb-6">
+            <h3 className="text-lg font-black text-slate-800 mb-4">Provide Feedback</h3>
+            
+            {!complaint.feedback?.rating ? (
+              <div className="mb-6">
+                <div className="flex gap-2 mb-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} onClick={() => setRating(star)} className="focus:outline-none transition-transform hover:scale-110">
+                      <svg className={`w-8 h-8 ${rating >= star ? 'text-amber-500' : 'text-slate-300'}`} fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+                <textarea 
+                  value={feedback} 
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Write your feedback..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  rows={3}
+                />
+                <button
+                  disabled={updating}
+                  onClick={handleSubmitFeedback}
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+                >
+                  Submit Feedback
+                </button>
+              </div>
+            ) : (
+              <div className="mb-6 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                <p className="text-sm font-bold text-amber-800">Feedback Submitted ({complaint.feedback.rating}/5)</p>
+                <p className="text-sm text-amber-700 mt-1">{complaint.feedback.comments}</p>
+              </div>
+            )}
+
+            <div className="border-t border-slate-100 pt-6 mt-2">
+              <h3 className="text-lg font-black text-slate-800 mb-4">Not Satisfied?</h3>
+              <textarea 
+                value={reopenReason} 
+                onChange={(e) => setReopenReason(e.target.value)}
+                placeholder="Reason for reopening..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                rows={3}
+              />
+              <button
+                disabled={updating}
+                onClick={handleReopen}
+                className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+              >
+                Reopen Complaint
+              </button>
+            </div>
+          </div>
         )}
 
         {/* Notes Modal */}

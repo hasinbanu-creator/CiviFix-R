@@ -112,7 +112,7 @@ __turbopack_context__.s([
     "default",
     ()=>__TURBOPACK__default__export__
 ]);
-const API_URL = ("TURBOPACK compile-time value", "http://localhost:8000/api/v1") || "http://34.14.168.135:8000/api/v1";
+const API_URL = ("TURBOPACK compile-time value", "https://cv.onenism.org/api/v1") || "http://34.14.168.135:8000/api/v1";
 const ENDPOINTS = {
     // Auth endpoints
     LOGIN: "/auth/login",
@@ -128,6 +128,8 @@ const ENDPOINTS = {
     GET_COMPLAINTS: "/complaints/my/dashboard",
     CREATE_COMPLAINT: "/complaints",
     GET_COMPLAINT: (id)=>`/complaints/${id}`,
+    SUBMIT_FEEDBACK: (id)=>`/complaints/${id}/feedback`,
+    REOPEN_COMPLAINT: (id)=>`/complaints/${id}/reopen`,
     // Ward/admin endpoints
     GET_WARDS_BY_DISTRICT: (districtId)=>`/wards/district/${districtId}`,
     SEARCH_WARDS: (districtId)=>`/wards/search/${districtId}`,

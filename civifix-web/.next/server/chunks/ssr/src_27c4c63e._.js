@@ -97,6 +97,20 @@ const complaintsApi = {
         const res = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].put(`/complaints/${id}/note`, payload);
         return (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["unwrapResponse"])(res);
     },
+    submitFeedback: async (id, data)=>{
+        const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].put(ENDPOINTS.SUBMIT_FEEDBACK(id), null, {
+            params: data
+        });
+        return response.data;
+    },
+    reopenComplaint: async (id, reason)=>{
+        const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].put(ENDPOINTS.REOPEN_COMPLAINT(id), null, {
+            params: {
+                reason
+            }
+        });
+        return response.data;
+    },
     resolveComplaintWithImages: async (id, formData)=>{
         const res = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].put(`/inspector/complaints/${id}/resolve`, formData);
         return (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["unwrapResponse"])(res);
@@ -131,6 +145,7 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$endpoints$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/constants/endpoints.ts [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$auth$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/services/auth.ts [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/navigation.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$complaints$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/hooks/use-complaints.ts [app-ssr] (ecmascript)");
@@ -164,6 +179,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$auth$2d$context$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/context/auth-context.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/services/api.ts [app-ssr] (ecmascript)");
 "use client";
+;
 ;
 ;
 ;
@@ -326,12 +342,12 @@ function InfoRow({ icon: Icon, label, value }) {
                     className: "w-5 h-5 text-muted-foreground"
                 }, void 0, false, {
                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                    lineNumber: 78,
+                    lineNumber: 79,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                lineNumber: 77,
+                lineNumber: 78,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -342,7 +358,7 @@ function InfoRow({ icon: Icon, label, value }) {
                         children: label
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 81,
+                        lineNumber: 82,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -350,19 +366,19 @@ function InfoRow({ icon: Icon, label, value }) {
                         children: value
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 82,
+                        lineNumber: 83,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                lineNumber: 80,
+                lineNumber: 81,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-        lineNumber: 76,
+        lineNumber: 77,
         columnNumber: 5
     }, this);
 }
@@ -378,7 +394,7 @@ function NoteCard({ icon: Icon, label, value, colorClass, borderClass, bgClass }
                         className: `w-5 h-5 ${colorClass}`
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 93,
+                        lineNumber: 94,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -386,13 +402,13 @@ function NoteCard({ icon: Icon, label, value, colorClass, borderClass, bgClass }
                         children: label
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 94,
+                        lineNumber: 95,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                lineNumber: 92,
+                lineNumber: 93,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -400,16 +416,29 @@ function NoteCard({ icon: Icon, label, value, colorClass, borderClass, bgClass }
                 children: value
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                lineNumber: 96,
+                lineNumber: 97,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-        lineNumber: 91,
+        lineNumber: 92,
         columnNumber: 5
     }, this);
 }
+const getFinalImageUri = (img)=>{
+    let finalUri = img;
+    if (img && typeof img === 'string' && !img.startsWith('http') && !img.startsWith('data:')) {
+        const base = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$endpoints$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_URL"] ? __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$endpoints$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_URL"].replace(/\/api\/v1\/?$/, '') : '';
+        // If the backend didn't include 'uploads/', we inject it.
+        let path = img.startsWith('/') ? img : '/' + img;
+        if (!path.startsWith('/uploads/')) {
+            path = '/uploads' + path;
+        }
+        finalUri = `${base}${path}`;
+    }
+    return finalUri;
+};
 function ComplaintDetailsPage() {
     const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$auth$2d$context$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAuth"])();
     const isPrivileged = user?.role === "INSPECTOR" || user?.role === "WORKER" || user?.role === "SUPER_ADMIN" || user?.role === "DISTRICT_ADMIN";
@@ -420,6 +449,17 @@ function ComplaintDetailsPage() {
     const { data, isLoading: loading, refetch } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$complaints$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useComplaint"])(id);
     const complaint = data;
     const queryClient = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$tanstack$2f$react$2d$query$2f$build$2f$modern$2f$QueryClientProvider$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useQueryClient"])();
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        if (complaint) {
+            console.log("--- DEBUG LOGS ---");
+            console.log("Complaint Response:", complaint);
+            console.log("complaint.images:", complaint.images);
+            console.log("complaint.image_urls:", complaint.image_urls);
+            console.log("complaint.proof_images:", complaint.proof_images);
+        }
+    }, [
+        complaint
+    ]);
     const [updating, setUpdating] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [showNotesModal, setShowNotesModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [showRejectModal, setShowRejectModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
@@ -427,6 +467,9 @@ function ComplaintDetailsPage() {
     const [newNote, setNewNote] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const [selectedProofImages, setSelectedProofImages] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
     const [selectedImagePreview, setSelectedImagePreview] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [rating, setRating] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(0);
+    const [feedback, setFeedback] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
+    const [reopenReason, setReopenReason] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const updateStatus = async (newStatus)=>{
         try {
             setUpdating(true);
@@ -439,7 +482,7 @@ function ComplaintDetailsPage() {
             setUpdating(false);
         }
     };
-    const handleStartWork = async ()=>{
+    const handleAccept = async ()=>{
         try {
             setUpdating(true);
             await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$auth$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].inspectorStartWork(id);
@@ -456,7 +499,36 @@ function ComplaintDetailsPage() {
             });
         } catch (e) {
             console.error(e);
-            alert("Failed to start work");
+            alert("Failed to accept complaint");
+        } finally{
+            setUpdating(false);
+        }
+    };
+    const handleSubmitFeedback = async ()=>{
+        if (rating === 0) return alert("Please select a rating");
+        try {
+            setUpdating(true);
+            await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["complaintsApi"].submitFeedback(id, {
+                rating,
+                feedback
+            });
+            alert("Feedback submitted successfully!");
+            refetch();
+        } catch (e) {
+            alert("Failed to submit feedback");
+        } finally{
+            setUpdating(false);
+        }
+    };
+    const handleReopen = async ()=>{
+        if (!reopenReason.trim()) return alert("Please provide a reason to reopen");
+        try {
+            setUpdating(true);
+            await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["complaintsApi"].reopenComplaint(id, reopenReason);
+            alert("Complaint reopened successfully!");
+            refetch();
+        } catch (e) {
+            alert("Failed to reopen complaint");
         } finally{
             setUpdating(false);
         }
@@ -541,7 +613,7 @@ function ComplaintDetailsPage() {
                         className: "w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 210,
+                        lineNumber: 269,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -549,18 +621,18 @@ function ComplaintDetailsPage() {
                         children: "Loading details..."
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 211,
+                        lineNumber: 270,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                lineNumber: 209,
+                lineNumber: 268,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-            lineNumber: 208,
+            lineNumber: 267,
             columnNumber: 7
         }, this);
     }
@@ -574,7 +646,7 @@ function ComplaintDetailsPage() {
                         className: "w-16 h-16 text-destructive mx-auto mb-4"
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 221,
+                        lineNumber: 280,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -582,7 +654,7 @@ function ComplaintDetailsPage() {
                         children: "Complaint Not Found"
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 222,
+                        lineNumber: 281,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -591,18 +663,18 @@ function ComplaintDetailsPage() {
                         children: "Go Back"
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 223,
+                        lineNumber: 282,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                lineNumber: 220,
+                lineNumber: 279,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-            lineNumber: 219,
+            lineNumber: 278,
             columnNumber: 7
         }, this);
     }
@@ -629,12 +701,12 @@ function ComplaintDetailsPage() {
                                         className: "w-6 h-6 text-white"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 246,
+                                        lineNumber: 308,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 242,
+                                    lineNumber: 304,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -644,7 +716,7 @@ function ComplaintDetailsPage() {
                                             children: "Complaint Details"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 249,
+                                            lineNumber: 311,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -652,37 +724,37 @@ function ComplaintDetailsPage() {
                                             children: complaint.complaint_id
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 250,
+                                            lineNumber: 312,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 248,
+                                    lineNumber: 310,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                            lineNumber: 241,
+                            lineNumber: 303,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: `w-4 h-4 rounded-full ${statusCfg.bg} border-[3px] border-white/50 shadow-sm mt-3`
                         }, void 0, false, {
                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                            lineNumber: 253,
+                            lineNumber: 315,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                    lineNumber: 240,
+                    lineNumber: 302,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                lineNumber: 239,
+                lineNumber: 301,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -700,12 +772,12 @@ function ComplaintDetailsPage() {
                                             className: `w-8 h-8 ${typeMeta.color}`
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 263,
+                                            lineNumber: 325,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 262,
+                                        lineNumber: 324,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -716,7 +788,7 @@ function ComplaintDetailsPage() {
                                                 children: complaint.title || typeMeta.title
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 266,
+                                                lineNumber: 328,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -724,19 +796,19 @@ function ComplaintDetailsPage() {
                                                 children: complaint.complaint_id
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 269,
+                                                lineNumber: 331,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 265,
+                                        lineNumber: 327,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 261,
+                                lineNumber: 323,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -749,7 +821,7 @@ function ComplaintDetailsPage() {
                                                 className: `w-5 h-5 ${statusCfg.color}`
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 275,
+                                                lineNumber: 337,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -757,13 +829,13 @@ function ComplaintDetailsPage() {
                                                 children: statusCfg.label
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 276,
+                                                lineNumber: 338,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 274,
+                                        lineNumber: 336,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -773,7 +845,7 @@ function ComplaintDetailsPage() {
                                                 className: `w-5 h-5 ${priorityCfg.color}`
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 279,
+                                                lineNumber: 341,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -784,13 +856,13 @@ function ComplaintDetailsPage() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 280,
+                                                lineNumber: 342,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 278,
+                                        lineNumber: 340,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -800,26 +872,26 @@ function ComplaintDetailsPage() {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 283,
+                                                lineNumber: 345,
                                                 columnNumber: 15
                                             }, this),
                                             new Date(complaint.created_at).toLocaleDateString()
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 282,
+                                        lineNumber: 344,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 273,
+                                lineNumber: 335,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 260,
+                        lineNumber: 322,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -834,12 +906,12 @@ function ComplaintDetailsPage() {
                                             className: "w-5 h-5 text-primary"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 293,
+                                            lineNumber: 355,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 292,
+                                        lineNumber: 354,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -847,13 +919,13 @@ function ComplaintDetailsPage() {
                                         children: "Complaint Info"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 295,
+                                        lineNumber: 357,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 291,
+                                lineNumber: 353,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(InfoRow, {
@@ -862,7 +934,7 @@ function ComplaintDetailsPage() {
                                 value: complaint.description
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 298,
+                                lineNumber: 360,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(InfoRow, {
@@ -871,7 +943,7 @@ function ComplaintDetailsPage() {
                                 value: complaint.address
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 299,
+                                lineNumber: 361,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(InfoRow, {
@@ -880,57 +952,74 @@ function ComplaintDetailsPage() {
                                 value: complaint.latitude && complaint.longitude ? `${complaint.latitude}, ${complaint.longitude}` : null
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 300,
+                                lineNumber: 362,
                                 columnNumber: 11
                             }, this),
-                            complaint.image_urls && complaint.image_urls.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "mt-8 pt-6 border-t border-border/50",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                        className: "text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4",
-                                        children: "Attached Images"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 308,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "grid grid-cols-2 md:grid-cols-4 gap-4",
-                                        children: complaint.image_urls.map((url, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "relative aspect-square rounded-2xl overflow-hidden border border-border shadow-sm cursor-pointer group",
-                                                onClick: ()=>setSelectedImagePreview(url),
-                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
-                                                    src: url,
-                                                    alt: `Complaint ${index + 1}`,
-                                                    className: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                    lineNumber: 316,
-                                                    columnNumber: 21
-                                                }, this)
-                                            }, index, false, {
+                            (()=>{
+                                let complaintImages = [];
+                                if (Array.isArray(complaint.images) && complaint.images.length > 0) {
+                                    complaintImages = complaint.images;
+                                } else if (Array.isArray(complaint.image_urls) && complaint.image_urls.length > 0) {
+                                    complaintImages = complaint.image_urls;
+                                } else if (Array.isArray(complaint.proof_images) && complaint.proof_images.length > 0) {
+                                    complaintImages = complaint.proof_images;
+                                }
+                                if (complaintImages.length > 0) {
+                                    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "mt-8 pt-6 border-t border-border/50",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                                className: "text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4",
+                                                children: "Attached Photos"
+                                            }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 311,
+                                                lineNumber: 381,
                                                 columnNumber: 19
-                                            }, this))
-                                    }, void 0, false, {
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "grid grid-cols-2 md:grid-cols-4 gap-4",
+                                                children: complaintImages.map((url, index)=>{
+                                                    const finalUrl = getFinalImageUri(url);
+                                                    console.log(`[Web] Rendering Image: ${url} -> ${finalUrl}`);
+                                                    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        className: "relative aspect-square rounded-2xl overflow-hidden border border-border shadow-sm cursor-pointer group",
+                                                        onClick: ()=>setSelectedImagePreview(finalUrl),
+                                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                                            src: finalUrl,
+                                                            alt: `Complaint ${index + 1}`,
+                                                            className: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                                            lineNumber: 392,
+                                                            columnNumber: 27
+                                                        }, this)
+                                                    }, index, false, {
+                                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                                        lineNumber: 387,
+                                                        columnNumber: 25
+                                                    }, this);
+                                                })
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                                lineNumber: 382,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 309,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 307,
-                                columnNumber: 13
-                            }, this),
+                                        lineNumber: 380,
+                                        columnNumber: 17
+                                    }, this);
+                                }
+                                return null;
+                            })(),
                             (complaint.citizen_note || complaint.worker_note || complaint.inspector_note || complaint.rejection_reason) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "h-px bg-border my-8"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 325,
+                                        lineNumber: 405,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -942,12 +1031,12 @@ function ComplaintDetailsPage() {
                                                     className: "w-5 h-5 text-muted-foreground"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                    lineNumber: 328,
+                                                    lineNumber: 408,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 327,
+                                                lineNumber: 407,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -955,13 +1044,13 @@ function ComplaintDetailsPage() {
                                                 children: "Notes"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 330,
+                                                lineNumber: 410,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 326,
+                                        lineNumber: 406,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(NoteCard, {
@@ -972,7 +1061,7 @@ function ComplaintDetailsPage() {
                                         borderClass: "border-primary"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 333,
+                                        lineNumber: 413,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(NoteCard, {
@@ -983,7 +1072,7 @@ function ComplaintDetailsPage() {
                                         borderClass: "border-secondary"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 340,
+                                        lineNumber: 420,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(NoteCard, {
@@ -994,7 +1083,7 @@ function ComplaintDetailsPage() {
                                         borderClass: "border-accent"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 347,
+                                        lineNumber: 427,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(NoteCard, {
@@ -1005,7 +1094,7 @@ function ComplaintDetailsPage() {
                                         borderClass: "border-destructive"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 354,
+                                        lineNumber: 434,
                                         columnNumber: 15
                                     }, this)
                                 ]
@@ -1013,7 +1102,7 @@ function ComplaintDetailsPage() {
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 290,
+                        lineNumber: 352,
                         columnNumber: 9
                     }, this),
                     isPrivileged && complaint.citizen && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1028,12 +1117,12 @@ function ComplaintDetailsPage() {
                                             className: "w-5 h-5 text-success"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 370,
+                                            lineNumber: 450,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 369,
+                                        lineNumber: 449,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1041,13 +1130,13 @@ function ComplaintDetailsPage() {
                                         children: "Citizen Information"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 372,
+                                        lineNumber: 452,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 368,
+                                lineNumber: 448,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(InfoRow, {
@@ -1056,7 +1145,7 @@ function ComplaintDetailsPage() {
                                 value: complaint.citizen.name
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 374,
+                                lineNumber: 454,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(InfoRow, {
@@ -1065,7 +1154,7 @@ function ComplaintDetailsPage() {
                                 value: complaint.citizen.phone
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 375,
+                                lineNumber: 455,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(InfoRow, {
@@ -1074,13 +1163,13 @@ function ComplaintDetailsPage() {
                                 value: complaint.citizen.email
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 376,
+                                lineNumber: 456,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 367,
+                        lineNumber: 447,
                         columnNumber: 11
                     }, this),
                     isPrivileged && complaint.history && complaint.history.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1095,12 +1184,12 @@ function ComplaintDetailsPage() {
                                             className: "w-5 h-5 text-primary"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 385,
+                                            lineNumber: 465,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 384,
+                                        lineNumber: 464,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1108,13 +1197,13 @@ function ComplaintDetailsPage() {
                                         children: "Activity Timeline"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 387,
+                                        lineNumber: 467,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 383,
+                                lineNumber: 463,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1128,7 +1217,7 @@ function ComplaintDetailsPage() {
                                                 className: `absolute -left-[41px] w-5 h-5 rounded-full border-[4px] border-card ${s.bg.replace('bg-', 'bg-').replace('10', '500')} shadow-sm`
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 394,
+                                                lineNumber: 474,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1136,7 +1225,7 @@ function ComplaintDetailsPage() {
                                                 children: s.label
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 395,
+                                                lineNumber: 475,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1144,7 +1233,7 @@ function ComplaintDetailsPage() {
                                                 children: new Date(h.timestamp || h.created_at).toLocaleString()
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 396,
+                                                lineNumber: 476,
                                                 columnNumber: 21
                                             }, this),
                                             h.remarks && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1152,25 +1241,25 @@ function ComplaintDetailsPage() {
                                                 children: h.remarks
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 400,
+                                                lineNumber: 480,
                                                 columnNumber: 23
                                             }, this)
                                         ]
                                     }, i, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 393,
+                                        lineNumber: 473,
                                         columnNumber: 19
                                     }, this);
                                 })
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 389,
+                                lineNumber: 469,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 382,
+                        lineNumber: 462,
                         columnNumber: 11
                     }, this),
                     user?.role === "INSPECTOR" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -1187,12 +1276,12 @@ function ComplaintDetailsPage() {
                                                     className: "w-5 h-5 text-teal-600"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                    lineNumber: 417,
+                                                    lineNumber: 497,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 416,
+                                                lineNumber: 496,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1200,13 +1289,13 @@ function ComplaintDetailsPage() {
                                                 children: "Complaint Actions"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 419,
+                                                lineNumber: 499,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 415,
+                                        lineNumber: 495,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1214,21 +1303,21 @@ function ComplaintDetailsPage() {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                 disabled: updating,
-                                                onClick: handleStartWork,
-                                                className: "flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl py-4 text-sm font-bold shadow-md shadow-teal-600/20 disabled:opacity-50 transition-all hover:-translate-y-0.5",
+                                                onClick: handleAccept,
+                                                className: "flex items-center justify-center gap-2 bg-[#059669] hover:bg-emerald-700 text-white rounded-2xl py-4 text-sm font-bold shadow-md shadow-emerald-600/20 disabled:opacity-50 transition-all hover:-translate-y-0.5",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$play$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Play$3e$__["Play"], {
                                                         className: "w-5 h-5"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                        lineNumber: 427,
+                                                        lineNumber: 507,
                                                         columnNumber: 21
                                                     }, this),
-                                                    " Start Work"
+                                                    " Accept"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 422,
+                                                lineNumber: 502,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1240,26 +1329,26 @@ function ComplaintDetailsPage() {
                                                         className: "w-5 h-5"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                        lineNumber: 434,
+                                                        lineNumber: 514,
                                                         columnNumber: 21
                                                     }, this),
                                                     " Reject"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 429,
+                                                lineNumber: 509,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 421,
+                                        lineNumber: 501,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 414,
+                                lineNumber: 494,
                                 columnNumber: 15
                             }, this),
                             complaint.status === "IN_PROGRESS" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1274,12 +1363,12 @@ function ComplaintDetailsPage() {
                                                     className: "w-5 h-5 text-teal-600"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                    lineNumber: 445,
+                                                    lineNumber: 525,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 444,
+                                                lineNumber: 524,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1287,13 +1376,13 @@ function ComplaintDetailsPage() {
                                                 children: "Complaint Actions"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 447,
+                                                lineNumber: 527,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 443,
+                                        lineNumber: 523,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1305,24 +1394,177 @@ function ComplaintDetailsPage() {
                                                 className: "w-5 h-5"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 454,
+                                                lineNumber: 534,
                                                 columnNumber: 19
                                             }, this),
                                             " Resolve Complaint"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                        lineNumber: 449,
+                                        lineNumber: 529,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 442,
+                                lineNumber: 522,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true),
+                    user?.role === "CITIZEN" && [
+                        "CLOSED",
+                        "RESOLVED"
+                    ].includes(complaint.status) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 mb-6",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                className: "text-lg font-black text-slate-800 mb-4",
+                                children: "Provide Feedback"
+                            }, void 0, false, {
+                                fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                lineNumber: 544,
+                                columnNumber: 13
+                            }, this),
+                            !complaint.feedback?.rating ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "mb-6",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "flex gap-2 mb-4",
+                                        children: [
+                                            1,
+                                            2,
+                                            3,
+                                            4,
+                                            5
+                                        ].map((star)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                onClick: ()=>setRating(star),
+                                                className: "focus:outline-none transition-transform hover:scale-110",
+                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                                    className: `w-8 h-8 ${rating >= star ? 'text-amber-500' : 'text-slate-300'}`,
+                                                    fill: "currentColor",
+                                                    viewBox: "0 0 20 20",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                        d: "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                                        lineNumber: 552,
+                                                        columnNumber: 25
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                                    lineNumber: 551,
+                                                    columnNumber: 23
+                                                }, this)
+                                            }, star, false, {
+                                                fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                                lineNumber: 550,
+                                                columnNumber: 21
+                                            }, this))
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                        lineNumber: 548,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
+                                        value: feedback,
+                                        onChange: (e)=>setFeedback(e.target.value),
+                                        placeholder: "Write your feedback...",
+                                        className: "w-full bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500",
+                                        rows: 3
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                        lineNumber: 557,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        disabled: updating,
+                                        onClick: handleSubmitFeedback,
+                                        className: "w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50",
+                                        children: "Submit Feedback"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                        lineNumber: 564,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                lineNumber: 547,
+                                columnNumber: 15
+                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "mb-6 p-4 bg-amber-50 rounded-xl border border-amber-100",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-sm font-bold text-amber-800",
+                                        children: [
+                                            "Feedback Submitted (",
+                                            complaint.feedback.rating,
+                                            "/5)"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                        lineNumber: 574,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-sm text-amber-700 mt-1",
+                                        children: complaint.feedback.comments
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                        lineNumber: 575,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                lineNumber: 573,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "border-t border-slate-100 pt-6 mt-2",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                        className: "text-lg font-black text-slate-800 mb-4",
+                                        children: "Not Satisfied?"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                        lineNumber: 580,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
+                                        value: reopenReason,
+                                        onChange: (e)=>setReopenReason(e.target.value),
+                                        placeholder: "Reason for reopening...",
+                                        className: "w-full bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-red-500",
+                                        rows: 3
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                        lineNumber: 581,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        disabled: updating,
+                                        onClick: handleReopen,
+                                        className: "w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50",
+                                        children: "Reopen Complaint"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                        lineNumber: 588,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                                lineNumber: 579,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
+                        lineNumber: 543,
+                        columnNumber: 11
+                    }, this),
                     showNotesModal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4",
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1333,7 +1575,7 @@ function ComplaintDetailsPage() {
                                     children: "Add Note"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 465,
+                                    lineNumber: 603,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
@@ -1343,7 +1585,7 @@ function ComplaintDetailsPage() {
                                     placeholder: "Type your observations..."
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 466,
+                                    lineNumber: 604,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1355,7 +1597,7 @@ function ComplaintDetailsPage() {
                                             children: "Cancel"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 473,
+                                            lineNumber: 611,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1365,24 +1607,24 @@ function ComplaintDetailsPage() {
                                             children: "Save Note"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 474,
+                                            lineNumber: 612,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 472,
+                                    lineNumber: 610,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                            lineNumber: 464,
+                            lineNumber: 602,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 463,
+                        lineNumber: 601,
                         columnNumber: 11
                     }, this),
                     showRejectModal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1399,12 +1641,12 @@ function ComplaintDetailsPage() {
                                                 className: "w-6 h-6 text-destructive"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 486,
+                                                lineNumber: 624,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 485,
+                                            lineNumber: 623,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1412,13 +1654,13 @@ function ComplaintDetailsPage() {
                                             children: "Confirm Rejection"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 488,
+                                            lineNumber: 626,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 484,
+                                    lineNumber: 622,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1426,7 +1668,7 @@ function ComplaintDetailsPage() {
                                     children: "Have you physically inspected the reported location and confirmed that this complaint should be rejected?"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 490,
+                                    lineNumber: 628,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1439,7 +1681,7 @@ function ComplaintDetailsPage() {
                                             children: "Cancel"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 494,
+                                            lineNumber: 632,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1449,24 +1691,24 @@ function ComplaintDetailsPage() {
                                             children: "Reject"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 501,
+                                            lineNumber: 639,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 493,
+                                    lineNumber: 631,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                            lineNumber: 483,
+                            lineNumber: 621,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 482,
+                        lineNumber: 620,
                         columnNumber: 11
                     }, this),
                     showResolveModal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1483,12 +1725,12 @@ function ComplaintDetailsPage() {
                                                 className: "w-6 h-6 text-success"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                lineNumber: 519,
+                                                lineNumber: 657,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 518,
+                                            lineNumber: 656,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1496,13 +1738,13 @@ function ComplaintDetailsPage() {
                                             children: "Mark Resolved"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 521,
+                                            lineNumber: 659,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 517,
+                                    lineNumber: 655,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1510,7 +1752,7 @@ function ComplaintDetailsPage() {
                                     children: "Have you verified that the issue has been successfully resolved?"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 523,
+                                    lineNumber: 661,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1521,7 +1763,7 @@ function ComplaintDetailsPage() {
                                             children: "Proof Images (Required)"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 528,
+                                            lineNumber: 666,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1542,7 +1784,7 @@ function ComplaintDetailsPage() {
                                                     }
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                    lineNumber: 530,
+                                                    lineNumber: 668,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1551,12 +1793,12 @@ function ComplaintDetailsPage() {
                                                         className: "w-5 h-5 text-success"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                        lineNumber: 542,
+                                                        lineNumber: 680,
                                                         columnNumber: 22
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                    lineNumber: 541,
+                                                    lineNumber: 679,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1564,13 +1806,13 @@ function ComplaintDetailsPage() {
                                                     children: "Tap or drag images here"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                    lineNumber: 544,
+                                                    lineNumber: 682,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 529,
+                                            lineNumber: 667,
                                             columnNumber: 17
                                         }, this),
                                         selectedProofImages.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1584,7 +1826,7 @@ function ComplaintDetailsPage() {
                                                             className: "w-full h-full object-cover"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                            lineNumber: 551,
+                                                            lineNumber: 689,
                                                             columnNumber: 25
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1599,29 +1841,29 @@ function ComplaintDetailsPage() {
                                                                 className: "w-3 h-3"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                                lineNumber: 561,
+                                                                lineNumber: 699,
                                                                 columnNumber: 27
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                            lineNumber: 552,
+                                                            lineNumber: 690,
                                                             columnNumber: 25
                                                         }, this)
                                                     ]
                                                 }, i, true, {
                                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                                    lineNumber: 550,
+                                                    lineNumber: 688,
                                                     columnNumber: 23
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 548,
+                                            lineNumber: 686,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 527,
+                                    lineNumber: 665,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1634,7 +1876,7 @@ function ComplaintDetailsPage() {
                                             children: "Cancel"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 570,
+                                            lineNumber: 708,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1644,24 +1886,24 @@ function ComplaintDetailsPage() {
                                             children: "Confirm"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                            lineNumber: 577,
+                                            lineNumber: 715,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 569,
+                                    lineNumber: 707,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                            lineNumber: 516,
+                            lineNumber: 654,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 515,
+                        lineNumber: 653,
                         columnNumber: 11
                     }, this),
                     selectedImagePreview && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1674,12 +1916,12 @@ function ComplaintDetailsPage() {
                                     className: "w-6 h-6 text-white"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                    lineNumber: 593,
+                                    lineNumber: 731,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 592,
+                                lineNumber: 730,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
@@ -1688,25 +1930,25 @@ function ComplaintDetailsPage() {
                                 className: "max-w-[90vw] max-h-[90vh] object-contain rounded-xl"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                                lineNumber: 595,
+                                lineNumber: 733,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                        lineNumber: 591,
+                        lineNumber: 729,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-                lineNumber: 257,
+                lineNumber: 319,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(dashboard)/complaints/[id]/page.tsx",
-        lineNumber: 236,
+        lineNumber: 298,
         columnNumber: 5
     }, this);
 }
