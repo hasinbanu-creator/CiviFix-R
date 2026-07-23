@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import authService, { UserSession, UserProfile } from "@/services/auth";
 import { getErrorMessage } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AuthContextType {
   isLoading: boolean;
@@ -23,6 +24,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [userToken, setUserToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -118,10 +120,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (err) {
       console.error("Logout error:", err);
     }
+    
+    queryClient.clear();
+    
     setUser(null);
     setUserToken(null);
     setIsSignout(true);
-  }, []);
+  }, [queryClient]);
 
   const clearError = useCallback(() => {
     setErrorState(null);

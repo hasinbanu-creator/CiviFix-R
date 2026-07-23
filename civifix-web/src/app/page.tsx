@@ -39,9 +39,9 @@ export default function Home() {
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-muted-foreground">
             <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-            <Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
-            <Link href="/complaints" className="hover:text-primary transition-colors">My Complaints</Link>
-            <Link href="/complaints/create" className="hover:text-primary transition-colors">Raise Issue</Link>
+            <Link href={user ? "/dashboard" : "/login"} className="hover:text-primary transition-colors">Dashboard</Link>
+            <Link href={user ? "/complaints" : "/login?redirect=/complaints"} className="hover:text-primary transition-colors">My Complaints</Link>
+            <Link href={user ? "/complaints/create" : "/login?redirect=/complaints/create"} className="hover:text-primary transition-colors">Raise Issue</Link>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -98,14 +98,14 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
-                href="/complaints/create"
+                href={user ? "/complaints/create" : "/login?redirect=/complaints/create"}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl text-base font-black text-primary bg-background hover:bg-muted transition-all hover:shadow-xl hover:shadow-black/20 active:scale-95 text-center border-2 border-transparent"
               >
                 File a Complaint
                 <ArrowRight className="w-5 h-5 text-primary" />
               </Link>
               <Link
-                href="/dashboard"
+                href={user ? "/dashboard" : "/login"}
                 className="inline-flex items-center justify-center px-8 py-4 rounded-2xl text-base font-black text-primary-foreground bg-white/10 hover:bg-white/20 border-2 border-white/30 transition-all active:scale-95 text-center backdrop-blur-sm"
               >
                 View Dashboard

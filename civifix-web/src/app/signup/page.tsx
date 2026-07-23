@@ -209,7 +209,9 @@ export default function SignupPage() {
     setError(null);
     try {
       await verifyRegister(formData.email.trim().toLowerCase(), otpValue);
-      router.push("/dashboard");
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get("redirect");
+      router.push(redirect || "/dashboard");
     } catch (err: any) {
       setOtpError(err.message || "Invalid OTP");
     } finally {

@@ -148,6 +148,7 @@ export default function ComplaintDetailsPage() {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [reopenReason, setReopenReason] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
 
   const updateStatus = async (newStatus: string) => {
     try {
@@ -206,16 +207,32 @@ export default function ComplaintDetailsPage() {
   };
 
   const handleRejectConfirm = async () => {
+    if (!rejectReason.trim()) {
+      alert("Please provide a rejection reason.");
+      return;
+    }
+    
     try {
       setUpdating(true);
-      setShowRejectModal(false);
+      
+      // Call existing Reject API
       await authService.inspectorRejectComplaint(id);
+      
+      // Save the rejection reason via Notes API
+      try {
+        await api.post(`/inspector/complaints/${id}/notes`, { note: `Rejection Reason: ${rejectReason}` });
+      } catch (noteErr) {
+        console.error("Failed to save rejection reason", noteErr);
+      }
+      
+      setShowRejectModal(false);
       refetch();
       queryClient.invalidateQueries({ queryKey: ["ward-complaints"] });
       queryClient.invalidateQueries({ queryKey: ["complaints"] });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Failed to reject complaint");
+      const msg = e.response?.data?.message || e.message || "Failed to reject complaint";
+      alert(msg);
     } finally {
       setUpdating(false);
     }
@@ -228,7 +245,7 @@ export default function ComplaintDetailsPage() {
       if (selectedProofImages.length > 0) {
         const formData = new FormData();
         selectedProofImages.forEach(file => {
-          formData.append("proof_images", file);
+          formData.append("images", file);
         });
         await complaintsApi.resolveComplaintWithImages(id, formData);
       } else {
@@ -239,9 +256,10 @@ export default function ComplaintDetailsPage() {
       refetch();
       queryClient.invalidateQueries({ queryKey: ["ward-complaints"] });
       queryClient.invalidateQueries({ queryKey: ["complaints"] });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Failed to resolve complaint");
+      const msg = e.response?.data?.message || e.message || "Failed to resolve complaint";
+      alert(msg);
     } finally {
       setUpdating(false);
     }
@@ -483,6 +501,21 @@ export default function ComplaintDetailsPage() {
                 );
               })}
             </div>
+            {complaint.notes && complaint.notes.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-border/50">
+                <h4 className="text-sm font-bold text-foreground mb-4">Inspector Notes</h4>
+                <div className="space-y-4">
+                  {complaint.notes.map((note: any, idx: number) => (
+                    <div key={idx} className="bg-amber-50 border border-amber-100 rounded-2xl p-4">
+                      <p className="text-sm font-medium text-amber-900">{note.text}</p>
+                      <p className="text-xs font-bold text-amber-700/60 mt-2">
+                        {new Date(note.created_at).toLocaleString()} • {note.role}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -623,11 +656,22 @@ export default function ComplaintDetailsPage() {
                 <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
                   <XCircle className="w-6 h-6 text-destructive" />
                 </div>
-                <h3 className="text-xl font-black text-foreground">Confirm Rejection</h3>
+                <h3 className="text-xl font-black text-foreground">Reject Complaint</h3>
               </div>
-              <p className="text-sm font-medium text-muted-foreground leading-relaxed mb-8">
-                Have you physically inspected the reported location and confirmed that this complaint should be rejected?
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed mb-4">
+                Please provide a detailed reason for rejecting this complaint. This will be visible to the citizen.
               </p>
+              
+              <div className="mb-8">
+                <label className="block text-xs font-bold text-muted-foreground tracking-wider mb-2 uppercase">Reason (Required)</label>
+                <textarea 
+                  value={rejectReason} 
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="E.g., Issue not found at location, duplicate complaint..."
+                  className="w-full bg-muted/20 border border-border rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 min-h-[100px]"
+                />
+              </div>
+
               <div className="flex gap-4">
                 <button
                   disabled={updating}
@@ -637,7 +681,7 @@ export default function ComplaintDetailsPage() {
                   Cancel
                 </button>
                 <button
-                  disabled={updating}
+                  disabled={updating || !rejectReason.trim()}
                   onClick={handleRejectConfirm}
                   className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-2xl shadow-md shadow-red-500/20 disabled:opacity-50 transition-colors"
                 >

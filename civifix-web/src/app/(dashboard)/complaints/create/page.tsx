@@ -136,15 +136,35 @@ export default function CreateComplaintPage() {
       if (form.address) formData.append("address", form.address);
       if (form.citizen_note) formData.append("citizen_note", form.citizen_note.trim());
       
-      selectedImages.forEach((file) => {
-        formData.append("images", file);
+      if (selectedImages.length === 0) {
+        // FastAPI throws 422 if List[UploadFile] is missing entirely from multipart/form-data
+        // Append an empty blob to satisfy the field presence, backend skips empty filenames
+        formData.append("images", new Blob([""], { type: "application/octet-stream" }), "");
+      } else {
+        selectedImages.forEach((file) => {
+          formData.append("images", file);
+        });
+      }
+      
+      // LOG PAYLOAD AS REQUESTED
+      console.log("Submitting Complaint Payload:");
+      formData.forEach((value, key) => {
+        console.log(`- ${key}:`, value);
       });
 
       const result = await createComplaint.mutateAsync(formData as any);
       setCreatedComplaint(result);
       setShowSuccess(true);
     } catch (err: any) {
-      setServerError(err.message || "Unable to submit. Please try again.");
+      // LOG COMPLETE ERROR BODY AS REQUESTED
+      console.error("Submission failed!", err);
+      console.error("Backend Response Data:", err?.response?.data);
+      
+      setServerError(
+        err?.response?.data?.detail 
+          ? JSON.stringify(err.response.data.detail)
+          : err.message || "Unable to submit. Please try again."
+      );
     } finally {
       setLoading(false);
     }

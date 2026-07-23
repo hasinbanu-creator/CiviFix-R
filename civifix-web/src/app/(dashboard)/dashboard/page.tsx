@@ -26,20 +26,23 @@ import {
   FileText,
   User
 } from "lucide-react";
-import { useComplaints } from "@/hooks/use-complaints";
+import { useComplaints, useWardComplaints } from "@/hooks/use-complaints";
 import { useInspectorDashboard, useAdminDashboard, useWorkerDashboard } from "@/hooks/use-dashboard";
 
 // --- Types ---
-type ComplaintStatus = "OPEN" | "WORKING" | "APPROVAL" | "CLOSED" | "REJECTED";
+type ComplaintStatus = "OPEN" | "PENDING" | "WORKING" | "IN_PROGRESS" | "APPROVAL" | "CLOSED" | "RESOLVED" | "REJECTED";
 type ComplaintType = "ROAD_DAMAGE" | "POTHOLE" | "GARBAGE" | "STREETLIGHT" | "WATER_SUPPLY" | "DRAINAGE" | "SANITATION" | "TREE_CUTTING" | "CONSTRUCTION" | "OTHER";
 
 // Mock Data / Styles - Updated with premium tokens
 const STATUS_STYLES: Record<ComplaintStatus, { label: string; color: string; bg: string }> = {
-  OPEN:     { label: "Pending",     color: "text-accent", bg: "bg-accent/10" },
-  WORKING:  { label: "In Progress", color: "text-primary",  bg: "bg-primary/10" },
-  APPROVAL: { label: "Review",      color: "text-secondary",  bg: "bg-secondary/10" },
-  CLOSED:   { label: "Resolved",    color: "text-success", bg: "bg-success/10" },
-  REJECTED: { label: "Rejected",    color: "text-destructive",   bg: "bg-destructive/10" },
+  OPEN:        { label: "Pending",     color: "text-accent", bg: "bg-accent/10" },
+  PENDING:     { label: "Pending",     color: "text-accent", bg: "bg-accent/10" },
+  WORKING:     { label: "In Progress", color: "text-primary",  bg: "bg-primary/10" },
+  IN_PROGRESS: { label: "In Progress", color: "text-primary",  bg: "bg-primary/10" },
+  APPROVAL:    { label: "Review",      color: "text-secondary",  bg: "bg-secondary/10" },
+  CLOSED:      { label: "Resolved",    color: "text-success", bg: "bg-success/10" },
+  RESOLVED:    { label: "Resolved",    color: "text-success", bg: "bg-success/10" },
+  REJECTED:    { label: "Rejected",    color: "text-destructive",   bg: "bg-destructive/10" },
 };
 
 const TYPE_META: Record<ComplaintType, { icon: React.ElementType; color: string; bg: string; title: string }> = {
@@ -289,42 +292,33 @@ function CitizenDashboard() {
 
 function InspectorDashboard() {
   const { user } = useAuth();
+  const router = useRouter();
   const [wards, setWards] = useState<any[]>([]);
   const [selectedWardId, setSelectedWardId] = useState<string>("all");
-  const [complaints, setComplaints] = useState<any[]>([]);
+  const { data: res, isLoading: isLoadingComplaints, refetch } = useWardComplaints({
+    ward_id: selectedWardId === "all" ? "" : selectedWardId,
+    limit: 100,
+  });
+
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [stats, setStats] = useState<any>({ total: 0, pending: 0, in_progress: 0, resolved: 0, rejected: 0 });
   const [isLoadingWards, setIsLoadingWards] = useState<boolean>(true);
-  const [isLoadingComplaints, setIsLoadingComplaints] = useState<boolean>(false);
-  
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const refreshData = async (wardId: string) => {
-    setIsLoadingComplaints(true);
-    try {
-      const res = await authService.getWardComplaints({
-        ward_id: wardId === "all" ? "" : wardId,
-        limit: 100,
-      });
-      const complaintsList = res?.complaints || res?.data || (Array.isArray(res) ? res : []);
-      setComplaints(complaintsList);
-      if (res?.stats) {
-        setStats(res.stats);
-      } else {
-        const total = complaintsList.length;
-        const pending = complaintsList.filter((c: any) => ["OPEN", "PENDING"].includes(c.status)).length;
-        const in_progress = complaintsList.filter((c: any) => ["IN_PROGRESS", "WORKING", "ACCEPTED", "FIELD_VISIT", "APPROVAL"].includes(c.status)).length;
-        const resolved = complaintsList.filter((c: any) => ["RESOLVED", "CLOSED"].includes(c.status)).length;
-        const rejected = complaintsList.filter((c: any) => c.status === "REJECTED").length;
-        setStats({ total, pending, in_progress, resolved, rejected });
-      }
-    } catch (error: any) {
-      console.error(error);
-      setComplaints([]);
-    } finally {
-      setIsLoadingComplaints(false);
-    }
+  const complaints = res?.complaints || res?.data || (Array.isArray(res) ? res : []) || [];
+  
+  const stats = useMemo(() => {
+    if (res?.stats) return res.stats;
+    const total = complaints.length;
+    const pending = complaints.filter((c: any) => ["OPEN", "PENDING"].includes(c.status)).length;
+    const in_progress = complaints.filter((c: any) => ["IN_PROGRESS", "WORKING", "ACCEPTED", "FIELD_VISIT", "APPROVAL"].includes(c.status)).length;
+    const resolved = complaints.filter((c: any) => ["RESOLVED", "CLOSED"].includes(c.status)).length;
+    const rejected = complaints.filter((c: any) => c.status === "REJECTED").length;
+    return { total, pending, in_progress, resolved, rejected };
+  }, [complaints, res]);
+
+  const refreshData = () => {
+    refetch();
   };
 
   useEffect(() => {
@@ -345,10 +339,6 @@ function InspectorDashboard() {
     }
     loadWards();
   }, []);
-
-  useEffect(() => {
-    refreshData(selectedWardId);
-  }, [selectedWardId]);
 
   const filteredComplaints = useMemo(() => {
     return complaints.filter(c => {
@@ -512,9 +502,13 @@ function InspectorDashboard() {
                     const typeMeta = TYPE_META[(c.complaint_type as ComplaintType)] || TYPE_META.OTHER;
                     
                     return (
-                      <tr key={c.id || c._id || c.complaint_id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                      <tr 
+                        key={c.id || c._id || c.complaint_id} 
+                        onClick={() => router.push(`/complaints/${c.id || c._id || c.complaint_id}`)}
+                        className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                      >
                         <td className="p-5">
-                          <p className="text-sm font-black text-slate-700">{c.complaint_id || "#CIV-NEW"}</p>
+                          <p className="text-sm font-black text-slate-700 hover:text-teal-600 transition-colors">{c.complaint_id || "#CIV-NEW"}</p>
                           <p className="text-xs font-medium text-slate-500 mt-0.5">{c.citizen?.name || "Citizen"}</p>
                         </td>
                         <td className="p-5">

@@ -110,7 +110,7 @@ function Home() {
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
-                                    href: "/dashboard",
+                                    href: user ? "/dashboard" : "/login",
                                     className: "hover:text-primary transition-colors",
                                     children: "Dashboard"
                                 }, void 0, false, {
@@ -119,7 +119,7 @@ function Home() {
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
-                                    href: "/complaints",
+                                    href: user ? "/complaints" : "/login?redirect=/complaints",
                                     className: "hover:text-primary transition-colors",
                                     children: "My Complaints"
                                 }, void 0, false, {
@@ -128,7 +128,7 @@ function Home() {
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
-                                    href: "/complaints/create",
+                                    href: user ? "/complaints/create" : "/login?redirect=/complaints/create",
                                     className: "hover:text-primary transition-colors",
                                     children: "Raise Issue"
                                 }, void 0, false, {
@@ -299,7 +299,7 @@ function Home() {
                                     className: "flex flex-col sm:flex-row gap-4",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
-                                            href: "/complaints/create",
+                                            href: user ? "/complaints/create" : "/login?redirect=/complaints/create",
                                             className: "inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl text-base font-black text-primary bg-background hover:bg-muted transition-all hover:shadow-xl hover:shadow-black/20 active:scale-95 text-center border-2 border-transparent",
                                             children: [
                                                 "File a Complaint",
@@ -317,7 +317,7 @@ function Home() {
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
-                                            href: "/dashboard",
+                                            href: user ? "/dashboard" : "/login",
                                             className: "inline-flex items-center justify-center px-8 py-4 rounded-2xl text-base font-black text-primary-foreground bg-white/10 hover:bg-white/20 border-2 border-white/30 transition-all active:scale-95 text-center backdrop-blur-sm",
                                             children: "View Dashboard"
                                         }, void 0, false, {

@@ -131,7 +131,9 @@ export default function LoginPage() {
     try {
       await verifyLogin(email.trim().toLowerCase(), otpValue);
       // Context will redirect or we can push
-      router.push("/dashboard");
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get("redirect");
+      router.push(redirect || "/dashboard");
     } catch (err: any) {
       setOtpError(err.response?.data?.message || "Invalid OTP. Please try again.");
     } finally {
